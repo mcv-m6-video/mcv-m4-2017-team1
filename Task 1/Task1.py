@@ -24,10 +24,10 @@ GTnames=[]
 ResultsA=[]
 ResultsB=[]
 
-binaryRootPath = '../results_testAB_changedetection/results/highway'
+binaryRootPath = '../datasets/results_testAB_changedetection/results/highway'
 names=os.listdir(binaryRootPath)
 
-GroundTruthPath= '../highway/groundtruth'
+GroundTruthPath= '../datasets/highway/groundtruth'
 namesGT=os.listdir(GroundTruthPath)
 
 
