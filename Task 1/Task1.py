@@ -16,14 +16,13 @@ from sklearn.preprocessing import StandardScaler
 from sklearn import svm
 from sklearn.decomposition import PCA
 
-
-
-
-call = subprocess.call
+import functions
 
 Anames=[]
 Bnames=[]  
 GTnames=[]
+ResultsA=[]
+ResultsB=[]
 
 binaryRootPath = '../results_testAB_changedetection/results/highway'
 names=os.listdir(binaryRootPath)
@@ -45,21 +44,36 @@ for j in range(len(names)):
         Anames.append(names[j])
     elif (prueba2[5] =='B'):
         Bnames.append(names[j])
+
+        
             
 for i in range(len(Anames)):                
-    imgA=binaryRootPath+'/'+Anames[0]
+    imgA=binaryRootPath+'/'+Anames[i]
     IA=cv2.imread(imgA)
-    imgB=binaryRootPath+'/'+Bnames[0]
+    IA=cv2.cvtColor(IA,cv2.COLOR_BGR2GRAY)
+    imgB=binaryRootPath+'/'+Bnames[i]
     IB=cv2.imread(imgB)
-    imgGT=GroundTruthPath+'/'+GTnames[0]
-    IGT=cv2.imread(imgGT)
-    height, width, channels = IGT.shape
-    for j in range
+    IB=cv2.cvtColor(IB,cv2.COLOR_BGR2GRAY)
+
+    imgGT=GroundTruthPath+'/'+GTnames[i]
+    IGT=cv2.imread(imgGT)               #abrir las ground truth y aplicar
+    I=cv2.cvtColor(IGT,cv2.COLOR_BGR2GRAY)#threshold para eliminar zonas no interesantes
+    ret,IBW=cv2.threshold(I,171,1,cv2.THRESH_BINARY)
+
+    TPA, FPA, TNA, FNA = functions.ComparisonImage(IBW,IA) #Comparacion Imagenes
+    TPB, FPB, TNB, FNB = functions.ComparisonImage(IBW,IB)
+    
+    ResultsA.append([TPA, FPA, TNA, FNA])
+    ResultsB.append([TPB, FPB, TNB, FNB])
 
     #leer las imagenes, un range de todos los pixel de la imagen, probar sklearn a ver que hace
 
-    
-cv2.imshow('Lena',IGT)
 
-k=cv2.waitKey(0)
+PrecisionA, RecallA, F1A = functions.EvaluationMetrics(ResultsA)  
+PrecisionB, RecallB, F1B = functions.EvaluationMetrics(ResultsB)
+
+ 
+#cv2.imshow('Lena',IGT)
+
+#k=cv2.waitKey(0)
         
