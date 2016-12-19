@@ -4,8 +4,6 @@ function F = flow_read (filename)
 
 I = double(imread(filename));
 
-isequal(I(:,:,1),I(:,:,2))
-
 F_u = (I(:,:,1)-2^15)/64;
 F_v = (I(:,:,2)-2^15)/64;
 F_valid = min(I(:,:,3),1);
@@ -14,4 +12,6 @@ F_v(F_valid==0) = 0;
 F(:,:,1) = F_u;
 F(:,:,2) = F_v;
 F(:,:,3) = F_valid;
+
+
 
