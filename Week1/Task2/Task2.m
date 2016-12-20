@@ -1,17 +1,21 @@
 clc;
 clear all;
-dirnameGT='../highway/groundtruth';
-GroundTruth=dir(fullfile([dirnameGT '/'],'*.png')); % Get all .png files
-dirnameAB='../results_testAB_changedetection/results/highway';
-AB=dir(fullfile([dirnameAB '/'],'*.png')); % Get all .png files
 
-[NamesA,NamesB]=GetNamesImg(AB);
-NamesGT=GetNamesGT(GroundTruth);
+TestDirectoryA = '../results/highway/testA/';
+TestDirectoryB = '../results/highway/testB/';
+GTDirectory = '../datasets/highway/reducedGT/';
 
-for i=1:length(NamesA)
-A = imread(fullfile([dirnameAB '/'],NamesA{i})); % Read the A image
-B = imread(fullfile([dirnameAB '/'],NamesB{i})); % Read the B image
-GT = imread(fullfile([dirnameGT '/'],NamesGT{i})); % Read the GT image
+FilesTestA = dir(strcat(TestDirectoryA, '*png'));
+FilesTestB = dir(strcat(TestDirectoryB, '*png'));
+FilesGT1 = dir(strcat(GTDirectory, '*png'));
+
+FilesGT=GetNamesGT(FilesGT1);
+
+for i=1:length(FilesTestA)
+A = imread(fullfile([TestDirectoryA '/'],FilesTestA(i).name)); % Read the A image
+B = imread(fullfile([TestDirectoryB '/'],FilesTestB(i).name)); % Read the B image
+GT = imread(fullfile([GTDirectory '/'],FilesGT{i})); % Read the GT image
+
 
 GT=BinarizeImg(GT);
 [TPA,TNA,FPA,FNA] = CalculateMetrics(GT,A);
