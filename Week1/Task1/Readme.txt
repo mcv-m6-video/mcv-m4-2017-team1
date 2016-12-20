@@ -1,8 +1,9 @@
 Task1 Gives as Result the F1, Precision and Recall for the two methods A & B.
 
-Function GetNamesImg:
-  This function computes all the names of the images in order to be able to open them afterwards. It separates the names between the         methods A or B depending on the name. It needs that the images of the methods A and B are in the same folder.
-  
+Images of GroundTruth should be in: '../datasets/highway/reducedGT/' from the directory of the Task1.
+Images of the Test A should be in: '../results/highway/testA/' from the directory of the Task1.
+Images of the Test B should be in: '../results/highway/testB/' from the directory of the Task1.
+
 Function GetNamesGT:
   This function computes all the names of the ground truth images in order to be able to open them afterwards.
   
