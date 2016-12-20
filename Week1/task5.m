@@ -1,9 +1,9 @@
 close all;
 
-I=imread('dataset/LKFlow/training/image_0/000157_10.png');
-I2=imread('dataset/LKFlow/training/image_0/000157_11.png');
+I=imread('datasets/LKFlow/training/image_0/000157_10.png');
+I2=imread('datasets/LKFlow/training/image_0/000157_11.png');
 %retrieve GT OF
-F2=flow_read('dataset/LKFlow/training/flow_noc/000157_10.png');
+F2=flow_read('datasets/LKFlow/training/flow_noc/000157_10.png');
 F_gt=opticalFlow(F2(:,:,1),F2(:,:,2));
 %estimate OF
 opticFlow = opticalFlowLK;
