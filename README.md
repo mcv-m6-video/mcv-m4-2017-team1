@@ -1,16 +1,12 @@
-# mcv-m4-2017-team1
+# Video Analysis (M4) - Master in Computer Vision, UAB
+Project for the Video Analysis module in the Master in Computer Vision by Universitat Autònoma de Barcelona. 
 
-Datasets:
+## Authors
 
-ChangeDetection:
-    Train:
-        datasets/highway
-    Tests provided:
-        datasets/results_testAB_changedetection
+- [Arantxa Casanova](https://github.com/ArantxaCasanova)
+- [Sergio Castro] (https://github.com/sclscl)
+- [Belén Luque](https://github.com/bluque)
 
-KITTI Vision Benchmark suite:
-    Train:
-        datasets/testing_of
-        datasets/training_of
-    Tests provided:
-        datasets/results_of
+## Project
+
+- Week 1: tasks are specified in the Readme.md of the folder Week1
