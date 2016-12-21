@@ -1,5 +1,5 @@
 
-- Our scripts assume the following paths:
+- Our scripts assume the following paths (relative to the root of the project):
 
   - Datasets:
 
