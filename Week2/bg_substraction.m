@@ -2,12 +2,12 @@ clc;
 close all;
 
 %Directories of original images, Test and ground truth
-InputDirectory = 'datasets/highway/reduced_input/';
+InputDirectory = 'datasets/traffic/reduced_input/';
 %TestDirectory = '../results/highway/testA/';
 %GTDirectory = '../datasets/highway/reducedGT/';
 
 video = 0; %Decide to save a video with the background substraction result
-
+adaptive = 1; % Adaptive background substraction
 %Store the information from the directories (#images, names...)
 FilesInput = dir(strcat(InputDirectory, '*jpg'))
 %FilesTest = dir(strcat(TestDirectory, '*png'));
@@ -31,13 +31,13 @@ pixelMean=[];
 pixelStd=[];
 all_frames=zeros(240,320,NFrames);
 figure;
-
-for i = 1:NFrames
+for i = 1:round(NFrames/2)
     
     %Read input image
     realImage = rgb2gray(imread(strcat(InputDirectory, FilesInput(i).name)));
-    all_frames(:,:,i)=realImage;
-    imshow(realImage);
+    all_frames(:,:,i)=double(realImage);
+    imshow(realImage)
+  %  imshow(realImage);
     %Only show one of the plots as they are updated in real time
     if video==0
         %Plot results
@@ -72,6 +72,26 @@ imshow(uint8(pixelMean));
 figure;
 imshow(uint8(pixelStd));
 
+alpha=1;
+rho=0;
+result=[];
+figure;
+for i = round(NFrames/2)+1: NFrames
+    realImage = rgb2gray(imread(strcat(InputDirectory, FilesInput(i).name)));
+    result=abs(double(realImage)-double(pixelMean))>= alpha* (double(pixelStd)+2);
+    subplot(1,2,1)
+    imshow(realImage)
+    subplot(1,2,2)
+    imshow(result);
+    drawnow();
+    
+    if adaptive == 1
+        realImage=double(realImage);
+        pixelMean(~logical(result))=rho*realImage(~logical(result)) + (1-rho)*pixelMean(~logical(result));
+        pixelStd(~logical(result))=sqrt(rho*(realImage(~logical(result))-pixelMean(~logical(result))).^2 + (1-rho)*pixelStd(~logical(result)).^2);
+    end
+    
+end
 if video==1
     %Close video object
     close(v)
