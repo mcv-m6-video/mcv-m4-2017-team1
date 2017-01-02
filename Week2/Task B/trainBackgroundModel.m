@@ -25,7 +25,7 @@ newN = mask;
 %Initialize variables to plot the changes in value, mean and deviation of a pixel
 pixelGray=[]; pixelMean=[]; pixelDev=[];
 pixel = [200,65]; %75,155
-figure(1)
+figure;
 
 for i = iniFrame+1:iniFrame+numFrames
     %Read an image and convert it to grayscale
@@ -60,6 +60,13 @@ for i = iniFrame+1:iniFrame+numFrames
     plot(1:i-iniFrame,pixelDev)
     hold off;
     drawnow();
+
 end
+
+xlabel('frames')
+ylabel('pixel value')
+title('Pixel value evolution along the sequence')
+drawnow();
+
 
 
