@@ -4,14 +4,14 @@ close all;
 %Directories of original images, Test and ground truth
 InputDirectory = 'datasets/traffic/reduced_input/';
 %TestDirectory = '../results/highway/testA/';
-%GTDirectory = '../datasets/highway/reducedGT/';
+GTDirectory = '../datasets/highway/reducedGT/';
 
 video = 0; %Decide to save a video with the background substraction result
-adaptive = 1; % Adaptive background substraction
+adaptive = 0; % Adaptive background substraction
 %Store the information from the directories (#images, names...)
 FilesInput = dir(strcat(InputDirectory, '*jpg'))
 %FilesTest = dir(strcat(TestDirectory, '*png'));
-%FilesGT = dir(strcat(GTDirectory, '*png'));
+FilesGT = dir(strcat(GTDirectory, '*png'));
 
 %Get sequence lenght
 NFrames = length(FilesInput)
@@ -20,13 +20,7 @@ NFrames = length(FilesInput)
 %TP = zeros(1,NFrames);
 %FG = zeros(1,NFrames);
 
-%Create a videowriter
-if video==1
-    F(NFrames) = struct('cdata',[],'colormap',[]);
-    v = VideoWriter('FMeasure.avi');
-    v.FrameRate = 10;
-    open(v)
-end
+
 pixelMean=[];
 pixelStd=[];
 all_frames=zeros(240,320,NFrames);
@@ -36,7 +30,7 @@ for i = 1:round(NFrames/2)
     %Read input image
     realImage = rgb2gray(imread(strcat(InputDirectory, FilesInput(i).name)));
     all_frames(:,:,i)=double(realImage);
-    imshow(realImage)
+  %  imshow(realImage)
   %  imshow(realImage);
     %Only show one of the plots as they are updated in real time
     if video==0
@@ -50,27 +44,19 @@ for i = 1:round(NFrames/2)
     %    ax2 = subplot(1,2,2);
      %   plot(1:i,FMeasure(1:i)); axis([0 200 0 1]); 
       %  xlabel(ax2,'#frame'); ylabel(ax2,'F Measure'); drawnow();
-    elseif video==1
-        %Plot the input image, test image and F Measure
-        figure(3)  
-        subplot(2,2,1); imshow(realImage); title('Input image')
-        subplot(2,2,2); imshow(testImage); title('Result from Test')
-        subplot(2,2,[3,4]); plot(1:i,FMeasure(1:i),'b'); title('F Measure');
-        xlabel('# frame'); ylabel('F Measure')
-        axis([0 200 0 1])
-        drawnow(); 
-        %Save the figure in a video
-        F(i) = getframe(gcf);
-        writeVideo(v,F(i));
+  
     end
 
 end
 pixelMean=mean(all_frames,3);
 pixelStd=std(all_frames,0,3);
 figure;
+subplot(1,2,1)
 imshow(uint8(pixelMean));
-figure;
+title('Mean')
+subplot(1,2,2)
 imshow(uint8(pixelStd));
+title('Std')
 
 alpha=1;
 rho=0;
@@ -79,6 +65,10 @@ figure;
 for i = round(NFrames/2)+1: NFrames
     realImage = rgb2gray(imread(strcat(InputDirectory, FilesInput(i).name)));
     result=abs(double(realImage)-double(pixelMean))>= alpha* (double(pixelStd)+2);
+    
+    %Read and binarize groundtruth image
+    gtImage = double(imread(strcat(GTDirectory, FilesGT(i).name))) >= 170; 
+
     subplot(1,2,1)
     imshow(realImage)
     subplot(1,2,2)
@@ -91,12 +81,5 @@ for i = round(NFrames/2)+1: NFrames
         pixelStd(~logical(result))=sqrt(rho*(realImage(~logical(result))-pixelMean(~logical(result))).^2 + (1-rho)*pixelStd(~logical(result)).^2);
     end
     
-end
-if video==1
-    %Close video object
-    close(v)
-elseif video==0
-    %Add legend of ax1
-  %  legend(ax1,'True positives','Positives');
 end
 
