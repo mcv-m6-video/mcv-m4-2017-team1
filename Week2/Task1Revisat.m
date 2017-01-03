@@ -48,10 +48,10 @@ for al = alpha
         %%%%% groundtruth = double(imread(strcat(groundtruthPath,FilesGroundtruth(i).name))) > 169;
 
         %Detect foreground objects
-        detection = detectForeground(grayscale, means, deviations,al);
-    
+        detection = detectForeground(grayscale, means, deviations,al); %"!!!!!!!!!! En aquesta funció, la fòrmula estava malament!!!!!!!!!!
+        
         %Compute the performance of the detector for the whole sequence
-        [TP,FP,TN,FN] = computeTP(groundtruth, detection);
+        [TP,FP,TN,FN] = computeTP(groundtruth, detection);    %!!!!!!!!!!!Aquesta funció es meva!!! la vaig tocar localment ja que l'altre tenia el problema que vam comentar
         TPTotal(k)=TPTotal(k)+TP;
         FPTotal(k)=FPTotal(k)+FP;
         TNTotal(k)=TNTotal(k)+TN;
@@ -62,6 +62,8 @@ for al = alpha
     end
     %Compute the performance of the detector for the whole sequence
     [precision(k),recall(k),accuracy(k),FMeasure(k)] = computeMetrics(TPTotal(k),FPTotal(k),TNTotal(k),FNTotal(k));
+%!!!!!!!!!!!!!!!!!!!!!!! Aquí hi havia el problema que ficàvem el TPTotal i
+%no el TPTotal(k)!!!!!!!!!!!!!!!!!!!!11
 end
 
 toc
