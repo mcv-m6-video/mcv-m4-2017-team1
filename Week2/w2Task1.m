@@ -17,7 +17,7 @@ for seq=1:numel(iniFrame)
 
 
 %Define the range of alpha
-alpha= 5:10;
+alpha= 0:30;
 
 %Allocate memory for variables
 numAlphas = size(alpha,2);
@@ -84,13 +84,13 @@ xlabel('Alpha')
 ylabel('Recall')
 figure()
 for seq=1:numel(iniFrame)
-    plot(vec(seq,:,1),vec(seq,:,2))
+    plot(vec(seq,:,2),vec(seq,:,1))
     hold on
 end
 hold off
 title('P-R curve')
-ylabel('Recall')
-xlabel('Precision')
+xlabel('Recall')
+ylabel('Precision')
 legend('Highway','Traffic','Fall')
 figure()
 plot(TPTotal)
@@ -104,3 +104,18 @@ hold off;
 legend('TP','FP','TN','FN')
 xlabel('Alpha')
 ylabel('Num. pixels')
+figure();
+for seq=1:numel(iniFrame)
+plot(vec(seq,:,4))
+hold on;
+end
+hold off;
+legend('Highway','Traffic','Fall')
+ylabel('Fmeasure')
+xlabel('alpha')
+title('Fmeasure for the 3 sequences')
+
+for seq=1:numel(iniFrame)
+auc=trapz(vec(seq,:,1),vec(seq,:,2));
+disp(['AUC for sequence ' num2str(seq) ': ' num2str(auc)] )
+end
