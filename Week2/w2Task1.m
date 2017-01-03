@@ -5,20 +5,20 @@ close all
 
 tic
 %Paths to the input images and their groundtruth
-sequencePath = {'datasets/highway/input/' 'datasets/traffic/input/'} ;
-groundtruthPath = {'datasets/highway/groundtruth/' 'datasets/traffic/groundtruth/'};
+sequencePath = {'../../datasets/highway/input/' 'datasets/traffic/input/'} ;
+groundtruthPath = {'../../datasets/highway/groundtruth/' 'datasets/traffic/groundtruth/'};
 %Initial and final frame of the sequence
 iniFrame = [1050 950];
 endFrame = [1350 1050];
 
-for seq=1:numel(iniFrame)
+for seq=1:1%numel(iniFrame)
 %Train the background model with the first half of the sequence
 
 [means, deviations] = trainBackgroundModel(char(sequencePath(seq)), char(groundtruthPath(seq)), iniFrame(seq), (endFrame(seq)-iniFrame(seq))/2);
 
 
 %Define the range of alpha
-alpha= 0:10;
+alpha= 5:10;
 
 %Allocate memory for variables
 numAlphas = size(alpha,2);
@@ -63,7 +63,7 @@ for al = alpha
         %imshow(detection)
     end
     %Compute the performance of the detector for the whole sequence
-    [precision(k),recall(k),accuracy(k),FMeasure(k)] = computeMetrics(TPTotal,FPTotal,TNTotal,FNTotal);
+    [precision(k),recall(k),accuracy(k),FMeasure(k)] = computeMetrics(TPTotal(k),FPTotal(k),TNTotal(k),FNTotal(k));
     vec(seq,k,1)=precision(k);
     vec(seq,k,2)=recall(k);
     vec(seq,k,3)=accuracy(k);
@@ -84,9 +84,9 @@ title('Recall')
 xlabel('Alpha')
 ylabel('Recall')
 figure()
-for seq=1:numel(iniFrame)
-plot(vec(seq,:,1),vec(seq,:,2))
-hold on
+for seq=1:1%numel(iniFrame)
+    plot(vec(seq,:,1),vec(seq,:,2))
+    hold on
 end
 hold off
 title('P-R curve')
