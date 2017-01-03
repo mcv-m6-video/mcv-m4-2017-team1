@@ -5,15 +5,14 @@ close all
 
 tic
 %Paths to the input images and their groundtruth
-sequencePath = {'../../datasets/highway/input/' 'datasets/traffic/input/'} ;
-groundtruthPath = {'../../datasets/highway/groundtruth/' 'datasets/traffic/groundtruth/'};
+sequencePath = {'datasets/highway/input/' 'datasets/traffic/input/' 'datasets/fall/input/'} ;
+groundtruthPath = {'datasets/highway/groundtruth/' 'datasets/traffic/groundtruth/' 'datasets/fall/groundtruth/'};
 %Initial and final frame of the sequence
-iniFrame = [1050 950];
-endFrame = [1350 1050];
+iniFrame = [1050 950 1460];
+endFrame = [1350 1050 1560];
 
-for seq=1:1%numel(iniFrame)
+for seq=1:numel(iniFrame)
 %Train the background model with the first half of the sequence
-
 [means, deviations] = trainBackgroundModel(char(sequencePath(seq)), char(groundtruthPath(seq)), iniFrame(seq), (endFrame(seq)-iniFrame(seq))/2);
 
 
@@ -84,7 +83,7 @@ title('Recall')
 xlabel('Alpha')
 ylabel('Recall')
 figure()
-for seq=1:1%numel(iniFrame)
+for seq=1:numel(iniFrame)
     plot(vec(seq,:,1),vec(seq,:,2))
     hold on
 end
@@ -92,7 +91,7 @@ hold off
 title('P-R curve')
 ylabel('Recall')
 xlabel('Precision')
-legend('Highway','Traffic')
+legend('Highway','Traffic','Fall')
 figure()
 plot(TPTotal)
 hold on;
