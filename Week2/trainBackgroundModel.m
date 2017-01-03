@@ -1,5 +1,8 @@
 function [newMean, newDev] = trainBackgroundModel(sequencePath, groundtruthPath, iniFrame, numFrames)
 
+%Plot boolean
+show_plot = 0;
+
 %Get the information of the input and groundtruth images
 FilesInput = dir(strcat(sequencePath, '*jpg'));
 FilesGroundtruth = dir(strcat(groundtruthPath, '*png'));
@@ -23,14 +26,25 @@ oldDev = zeros(size(oldMean));
 newN = mask;
 
 %Initialize variables to plot the changes in value, mean and deviation of a pixel
-pixelGray=[]; pixelMean=[]; pixelDev=[];
 pixel = [200,65]; %75,155
-figure;
+pixelGray=grayscale(200,65); pixelMean=pixelGray; pixelDev=0;
+
+if show_plot==1
+    figure;
+end
 
 for i = iniFrame+1:iniFrame+numFrames
     %Read an image and convert it to grayscale
     image = imread(strcat(sequencePath,FilesInput(i).name));
     grayscale = double(rgb2gray(image));
+    
+    if show_plot==1
+        subplot(2,1,1)
+        imshow(uint8(grayscale(120:240,:,:)))
+        rectangle('Position',[61,196-120,8,8],'EdgeColor','r')
+        title('Zoom of frame, with evaluated pixel inside the red rectangle')
+        drawnow();
+    end
     %Create a mask of the pixels to take into account in the computation of the
     %mean and deviation
     mask = double(imread(strcat(groundtruthPath,FilesGroundtruth(i).name)))==0;
@@ -54,19 +68,22 @@ for i = iniFrame+1:iniFrame+numFrames
     pixelMean = [pixelMean newMean(pixel(1),pixel(2))];
     pixelDev = [pixelDev newDev(pixel(1),pixel(2))];
 
-    plot(1:i-iniFrame,pixelMean)
-    hold on;
-    plot(1:i-iniFrame,pixelGray)
-    plot(1:i-iniFrame,pixelDev)
-    hold off;
-    drawnow();
-
+    if show_plot==1
+        subplot(2,1,2)
+        plot(iniFrame:i,pixelMean)
+        hold on;
+        plot(iniFrame:i,pixelGray)
+        plot(iniFrame:i,pixelDev)
+        hold off;
+        drawnow();
+    end
+ 
 end
-
-xlabel('frames')
-ylabel('pixel value')
-title('Pixel value evolution along the sequence')
-drawnow();
-
-
-
+    
+if show_plot==1
+    legend('Pixel''s mean','Pixel'' gray value','Pixel''s standard deviation')
+    xlabel('# frame')
+    ylabel('Pixel value')
+    title('Pixel evolution along the sequence')
+    drawnow();
+end
