@@ -18,7 +18,7 @@ for seq=1:numel(iniFrame)
 
 
 %Define the range of alpha
-alpha= 0:5;
+alpha= 0:30;
 
 %Allocate memory for variables
 numAlphas = size(alpha,2);
@@ -44,7 +44,9 @@ for o=1:(size(means,3))
         for i = iniFrame(seq)+(endFrame(seq)-iniFrame(seq))/2+1:endFrame(seq)
         %Read an image and convert it to grayscale
             image = imread(strcat(char(sequencePath(seq)),FilesInput(i).name));
-            grayscale = double(image);
+            %grayscale = double(image);                     %RGB color space
+            grayscale = double(ConvertRGBtoYUV(image));     %YUV Color Space
+            
         %Read the groundtruth image
             groundtruth = readGroundtruth(char(strcat(groundtruthPath(seq),FilesGroundtruth(i).name)));  
         %%%%% --> better results if we count the hard shadows as foreground
@@ -81,68 +83,156 @@ end
 %Plot some figures
 
 %Precision
+for o=1:numChannels
+    figure(); 
+    for seq=1:numel(iniFrame)
+        plot(alpha, vec{seq}(o,:,1))
+        hold on
+    end
+    hold off
+    if o==1
+        title('Precision for the 3 sequences 1st Channel'); xlabel('Alpha'); ylabel('Precision')
+    elseif o==2
+        title('Precision for the 3 sequences 2nd Channel'); xlabel('Alpha'); ylabel('Precision') 
+    else
+        title('Precision for the 3 sequences 3rd Channel'); xlabel('Alpha'); ylabel('Precision')
+    end
+    legend('Highway','Traffic','Fall'); ylim([0 1])
+end
+
+%Recall
+for o=1:numChannels
+    figure(); 
+    for seq=1:numel(iniFrame)
+        plot(alpha, vec{seq}(o,:,2))
+        hold on
+    end
+    hold off
+    if o==1
+        title('Recall for the 3 sequences 1st Channel'); xlabel('Alpha'); ylabel('Recall')
+    elseif o==2
+        title('Recall for the 3 sequences 2nd Channel'); xlabel('Alpha'); ylabel('Recall')
+    else 
+        title('Recall for the 3 sequences 3rd Channel'); xlabel('Alpha'); ylabel('Recall')
+    end
+    legend('Highway','Traffic','Fall'); ylim([0 1])
+end
+
+%Precision-Recall
+for o=1:numChannels
+    figure()
+    for seq=1:numel(iniFrame)
+        plot(vec{seq}(o,:,2),vec{seq}(o,:,1))
+        hold on
+    end
+    hold off
+    if o==1
+        title('P-R curve for the 3 sequences 1st Channel'); xlabel('Recall'); ylabel('Precision')
+    elseif o==2
+        title('P-R curve for the 3 sequences 2nd Channel'); xlabel('Recall'); ylabel('Precision')
+    else
+        title('P-R curve for the 3 sequences 3rd Channel'); xlabel('Recall'); ylabel('Precision')
+    end
+    legend('Highway','Traffic','Fall'); axis([0 1 0 1])
+end
+
+%F Measure
+for o=1:numChannels
+    figure();
+    for seq=1:numel(iniFrame)
+        plot(alpha, vec{seq}(o,:,4))
+        hold on;
+    end
+    hold off;
+    if o==1
+        title('Fmeasure for the 3 sequences 1st Channel'); xlabel('Alpha'); ylabel('Fmeasure')
+    elseif o==2
+        title('Fmeasure for the 3 sequences 2nd Channel'); xlabel('Alpha'); ylabel('Fmeasure')
+    else
+        title('Fmeasure for the 3 sequences 3rd Channel'); xlabel('Alpha'); ylabel('Fmeasure')
+    end
+    legend('Highway','Traffic','Fall'); ylim([0 1])
+end
+
+%Join Measure in one answer
+
+PF=[];RF=[];FF=[];
+for seq=1:numel(iniFrame)
+    P=0;R=0;F=0;
+    for o=1:3
+        P=vec{seq}(o,:,1)+P;
+        R=vec{seq}(o,:,2)+R;
+        F=vec{seq}(o,:,4)+F;
+    end
+    PF{seq}=P/3;
+    RF{seq}=R/3;
+    FF{seq}=F/3;
+end
+
+%Precision of join measure
 figure(); 
 for seq=1:numel(iniFrame)
-    plot(alpha, vec(seq,:,1))
+    plot(alpha, PF{seq})
     hold on
 end
 hold off
 title('Precision for the 3 sequences'); xlabel('Alpha'); ylabel('Precision')
 legend('Highway','Traffic','Fall'); ylim([0 1])
 
-%Recall
+%Recall for join Measures
 figure(); 
 for seq=1:numel(iniFrame)
-    plot(alpha, vec(seq,:,2))
+    plot(alpha, RF{seq})
     hold on
 end
 hold off
 title('Recall for the 3 sequences'); xlabel('Alpha'); ylabel('Recall')
 legend('Highway','Traffic','Fall'); ylim([0 1])
 
-%Precision-Recall
+%Precision-Recall for join measures
 figure()
 for seq=1:numel(iniFrame)
-    plot(vec(seq,:,2),vec(seq,:,1))
+    plot(RF{seq},PF{seq})
     hold on
 end
 hold off
 title('P-R curve for the 3 sequences'); xlabel('Recall'); ylabel('Precision')
 legend('Highway','Traffic','Fall'); axis([0 1 0 1])
 
-%F Measure
-figure();
+%F1 for join Measures
+figure(); 
 for seq=1:numel(iniFrame)
-    plot(alpha, vec(seq,:,4))
-    hold on;
+    plot(alpha, FF{seq})
+    hold on
 end
-hold off;
-title('Fmeasure for the 3 sequences'); xlabel('Alpha'); ylabel('Fmeasure')
+hold off
+title('F1 for the 3 sequences'); xlabel('Alpha'); ylabel('F1')
 legend('Highway','Traffic','Fall'); ylim([0 1])
 
 
+
 %TP,FP,TN,FN
-figure()
-subplot(3,1,1)
-plot(alpha, vec(1,:,5), alpha, vec(1,:,6), alpha, vec(1,:,7), alpha, vec(1,:,8))
-title('TP,FP,TN & FN'); xlabel('Alpha'); ylabel('# pixels')
-legend('TP Highway','FP Highway','TN Highway','FN Highway')
-ylim([0 2*10^7])
-
-subplot(3,1,2)
-plot(alpha, vec(2,:,5), alpha, vec(2,:,6), alpha, vec(2,:,7), alpha, vec(2,:,8))
-title('TP,FP,TN & FN'); xlabel('Alpha'); ylabel('# pixels')
-legend('TP Traffic','FP Traffic','TN Traffic','FN Traffic')
-ylim([0 2*10^7])
-
-subplot(3,1,3)
-plot(alpha, vec(3,:,5), alpha, vec(3,:,6), alpha, vec(3,:,7), alpha, vec(3,:,8))
-title('TP,FP,TN & FN'); xlabel('Alpha'); ylabel('# pixels')
-legend('TP Fall','FP Fall','TN Fall','FN Fall')
-ylim([0 2*10^7])
-
-
-for seq=1:numel(iniFrame)
-    auc=trapz(vec(seq,:,1),vec(seq,:,2));
-    disp(['AUC for sequence ' num2str(seq) ': ' num2str(auc)] )
-end
+% figure()
+% subplot(3,1,1)
+% plot(alpha, vec(1,:,5), alpha, vec(1,:,6), alpha, vec(1,:,7), alpha, vec(1,:,8))
+% title('TP,FP,TN & FN'); xlabel('Alpha'); ylabel('# pixels')
+% legend('TP Highway','FP Highway','TN Highway','FN Highway')
+% ylim([0 2*10^7])
+% 
+% subplot(3,1,2)
+% plot(alpha, vec(2,:,5), alpha, vec(2,:,6), alpha, vec(2,:,7), alpha, vec(2,:,8))
+% title('TP,FP,TN & FN'); xlabel('Alpha'); ylabel('# pixels')
+% legend('TP Traffic','FP Traffic','TN Traffic','FN Traffic')
+% ylim([0 2*10^7])
+% 
+% subplot(3,1,3)
+% plot(alpha, vec(3,:,5), alpha, vec(3,:,6), alpha, vec(3,:,7), alpha, vec(3,:,8))
+% title('TP,FP,TN & FN'); xlabel('Alpha'); ylabel('# pixels')
+% legend('TP Fall','FP Fall','TN Fall','FN Fall')
+% ylim([0 2*10^7])
+% 
+% 
+% for seq=1:numel(iniFrame)
+%     auc=trapz(vec(seq,:,1),vec(seq,:,2));
+%     disp(['AUC for sequence ' num2str(seq) ': ' num2str(auc)] )
+% end
