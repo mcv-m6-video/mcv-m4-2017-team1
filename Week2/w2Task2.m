@@ -3,7 +3,7 @@
 %Traffic 950 - 1050
 close all
 
-video=0;
+video=1;
 tic
 %Paths to the input images and their groundtruth
 sequencePath = {'datasets/highway/input/' 'datasets/traffic/input/' 'datasets/fall/input/'} ;
@@ -12,7 +12,7 @@ groundtruthPath = {'datasets/highway/groundtruth/' 'datasets/traffic/groundtruth
 iniFrame = [1050 950 1460];
 endFrame = [1350 1050 1560];
 
-for seq=1:numel(iniFrame)
+for seq=3:3
     disp(['Sequence ' num2str(seq)])
 %Train the background model with the first half of the sequence
 [means, deviations] = trainBackgroundModel(char(sequencePath(seq)), char(groundtruthPath(seq)), iniFrame(seq), (endFrame(seq)-iniFrame(seq))/2);
@@ -21,9 +21,13 @@ for seq=1:numel(iniFrame)
        
 
 %Define the range of alpha
-alpha= 0:30;
+if seq==1
+alpha= 6;
+else
+alpha=6;
+end
 %Define the range of rho
-rho=linspace(0,1,10);
+rho=0.8;
 %Allocate memory for variables
 numAlphas = size(alpha,2);
 numRhos= size(rho,2);
@@ -43,7 +47,13 @@ k=0;
 l=0;
 
 if video==1 
+    NFrames=length(FilesInput);
     figure();
+    set(gcf, 'Position', get(0,'Screensize')); % Maximize figure
+    F(NFrames) = struct('cdata',[],'colormap',[]);
+    v = VideoWriter('Fall-task2_rho08.avi');
+    v.FrameRate = 10;
+    open(v)
 end
 for al = alpha
     k=k+1;
@@ -62,14 +72,30 @@ for al = alpha
         groundtruth = readGroundtruth(char(strcat(groundtruthPath(seq),FilesGroundtruth(i).name)));  
         %%%%% --> better results if we count the hard shadows as foreground
         %%%%% groundtruth = double(imread(strcat(groundtruthPath,FilesGroundtruth(i).name))) > 169;
-
+      old_means=means;
+      old_deviations=deviations;
+      
         %Detect foreground objects
         [detection,means,deviations] = detectForeground_adaptive(grayscale, means, deviations,al,r);
-    
-        if video==1
-            subplot(2,1,1); imshow(uint8(grayscale));
-            subplot(2,1,2); imshow(logical((detection)));
+       if video==1
+            subplot(2,3,1); imshow(uint8(grayscale));
+            title('Sequence')
+            subplot(2,3,4); imshow(logical((detection)));
+            title('Sequence segmentation')
+            subplot(2,3,2); imshow(uint8(means));
+            title ('Background mean')
+            subplot(2,3,5); imagesc(uint8(old_means-means));
+            colorbar;
+            title('Mean difference between frames')
+            subplot(2,3,3); imshow(uint8(deviations),[min(min(deviations)) max(max(deviations))]);
+            title ('Background deviation')     
+            subplot(2,3,6); imagesc(uint8(old_deviations-deviations));
+            colorbar;
+            title('Deviation difference between frames')
             drawnow();
+             %Save the figure in a video
+        F(i) = getframe(gcf);
+        writeVideo(v,F(i));
         end
         
         %Compute the performance of the detector for the whole sequence
@@ -106,36 +132,50 @@ for al = alpha
     end
 end
 end
-
+if video==1
+    %Close video object
+    close(v)
+end 
 toc
 %F-measure plots . Adaptive
-figure();
-stem3(alpha,rho,vec_seq1(:,:,4))
-hold on;
-stem3(alpha,rho,vec_seq2(:,:,4))
-hold on;
-stem3(alpha,rho,vec_seq3(:,:,4))
-hold off;
-legend('Highway','Traffic','Fall')
+figure;
+surf(alpha,rho,vec_seq1(:,:,4))
+hold on
 ylabel('rho')
 xlabel('alpha')
 zlabel('Fmeasure')
-title('Fmeasure for the 3 sequences')
+title('Highway sequence')
+figure;
+surf(alpha,rho,vec_seq2(:,:,4))
+hold on
+ylabel('rho')
+xlabel('alpha')
+zlabel('Fmeasure')
+title('Traffic sequence')
+figure;
+surf(alpha,rho,vec_seq3(:,:,4))
+hold on
+ylabel('rho')
+xlabel('alpha')
+zlabel('Fmeasure')
+title('Fall sequence')
 
 %BEST rho and alpha parameters for the 3 sequences
 disp ('Best parameters for sequence 1')
 ind=find(vec_seq1(:,:,4)==max(max(vec_seq1(:,:,4))));
 [m,n]=ind2sub(size(vec_seq1(:,:,4)),ind);
 disp(['Alpha: ' num2str(alpha(n)) ', Rho: ' num2str(rho(m)) ' with Fmeasure ' num2str(vec_seq1(m,n,4))])
+wp_seq1=[m,n];
 disp ('Best parameters for sequence 2')
 ind=find(vec_seq2(:,:,4)==max(max(vec_seq2(:,:,4))));
 [m,n]=ind2sub(size(vec_seq1(:,:,4)),ind);
 disp(['Alpha: ' num2str(alpha(n)) ', Rho: ' num2str(rho(m)) ' with Fmeasure ' num2str(vec_seq2(m,n,4))])
+wp_seq2=[m,n];
 disp ('Best parameters for sequence 3')
 ind=find(vec_seq3(:,:,4)==max(max(vec_seq3(:,:,4))));
 [m,n]=ind2sub(size(vec_seq1(:,:,4)),ind);
 disp(['Alpha: ' num2str(alpha(n)) ', Rho: ' num2str(rho(m)) ' with Fmeasure ' num2str(vec_seq3(m,n,4))])
-
+wp_seq3=[m,n];
 % F-measure plot comparison adaptive vs non-adaptive
 figure();
 plot(vec_seq1(1,:,4),'--g')
@@ -150,7 +190,7 @@ plot(vec_seq3(1,:,4),'--r')
 hold on
 plot(vec_seq3(2,:,4),'r')
 hold off
-legend('Seq1 - non adaptive', 'Seq1 - adaptive, rho=0.22','Seq2 - non adaptive', 'Seq2 - adaptive, rho=0.22', 'Seq3 - non adaptive', 'Seq3 - adaptive, rho=0.33')
+legend('Seq1 - non adaptive', 'Seq1 - adaptive, rho=0.11','Seq2 - non adaptive', 'Seq2 - adaptive, rho=0.11', 'Seq3 - non adaptive', 'Seq3 - adaptive, rho=0.11')
 xlabel('alpha')
 ylabel('FMeasure')
 
@@ -158,22 +198,17 @@ ylabel('FMeasure')
 figure()
  plot(vec_seq1(1,:,2),vec_seq1(1,:,1),'--g')
  hold on
- plot(vec_seq1(3,:,2),vec_seq1(3,:,1),'g')
+ plot(vec_seq1(2,:,2),vec_seq1(3,:,1),'g')
  hold on
  plot(vec_seq2(1,:,2),vec_seq2(1,:,1),'--b')
  hold on
- plot(vec_seq2(3,:,2),vec_seq2(3,:,1),'b')
+ plot(vec_seq2(2,:,2),vec_seq2(3,:,1),'b')
  hold on
  plot(vec_seq3(1,:,2),vec_seq3(1,:,1),'--r')
  hold on
- plot(vec_seq3(4,:,2),vec_seq3(4,:,1),'r')
-hold on
-plot(vec(1,:,2),vec(1,:,1),'--m')
-hold on
-plot(vec(2,:,2),vec(2,:,1),'-.b')
-hold on 
-plot(vec(3,:,2),vec(3,:,1),'-.g')
+ plot(vec_seq3(2,:,2),vec_seq3(4,:,1),'r')
+
  hold off
 
-title('P-R curve for the 3 sequences (adaptive and non-adaptive'); xlabel('Recall'); ylabel('Precision')
-legend('Highway (non-adaptive)','Highway (adaptive,rho=0.22)','Traffic (non-adaptive)','Traffic (adaptive, rho=0.22)','Fall (non-adaptive)','Fall (adaptive,rho=0.22)'); axis([0 1 0 1])
+title('P-R curve for the 3 sequences (adaptive and non-adaptive)'); xlabel('Recall'); ylabel('Precision')
+legend('Highway (non-adaptive)','Highway (adaptive,rho=0.11)','Traffic (non-adaptive)','Traffic (adaptive, rho=0.11)', 'Fall (non-adaptive)','Fall (adaptive,rho=0.11)'); axis([0 1 0 1])
