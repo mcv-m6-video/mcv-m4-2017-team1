@@ -27,7 +27,7 @@ for seq=1:numel(iniFrame)
     FilesGroundtruth = dir(char(strcat(groundtruthPath(seq), '*png')));
     
     for k=Gauss
-    numGaus=k;    
+    numGaus=k;  
     detector = vision.ForegroundDetector('NumTrainingFrames',((endFrame(seq)-iniFrame(seq))/2), 'NumGaussians',numGaus, 'InitialVariance',30^2) ;
         for i = iniFrame(seq):(iniFrame(seq)+(endFrame(seq)-iniFrame(seq))/2)
             image = imread(strcat(char(sequencePath(seq)),FilesInput(i).name));
@@ -42,6 +42,12 @@ for seq=1:numel(iniFrame)
             grayscale=image;
             groundtruth = readGroundtruth(char(strcat(groundtruthPath(seq),FilesGroundtruth(i).name)));
             foreground = step(detector, grayscale);
+            if seq==2
+                se = strel('disk',3);
+            else
+                se = strel('disk',1);   
+            end
+            foreground=imopen(foreground,se);
         
             [TP,FP,TN,FN] = computePerformance(groundtruth, foreground);
             TPTotal(k)=TPTotal(k)+TP;
@@ -60,6 +66,7 @@ for seq=1:numel(iniFrame)
         vec(seq,k,8)=FNTotal(k);
 
     end
+  
 end
 
 
