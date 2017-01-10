@@ -12,7 +12,7 @@ groundtruthPath = {'datasets/highway/groundtruth/' 'datasets/traffic/groundtruth
 iniFrame = [1050 950 1460];
 endFrame = [1350 1050 1560];
 
-for seq=3:3
+for seq=1:3
     disp(['Sequence ' num2str(seq)])
 %Train the background model with the first half of the sequence
 [means, deviations] = trainBackgroundModel(char(sequencePath(seq)), char(groundtruthPath(seq)), iniFrame(seq), (endFrame(seq)-iniFrame(seq))/2);
@@ -22,12 +22,12 @@ for seq=3:3
 
 %Define the range of alpha
 if seq==1
-alpha= 6;
+alpha= 0:30;
 else
-alpha=6;
+alpha=0:30;
 end
 %Define the range of rho
-rho=0.8;
+rho=0:0.1:1;
 %Allocate memory for variables
 numAlphas = size(alpha,2);
 numRhos= size(rho,2);
