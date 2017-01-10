@@ -27,7 +27,7 @@ for seq=1:3
         alpha=linspace (0,30,31);
     end
     %Define the range of rho
-    rho=0:0.1:1;
+    rho=linspace (0,1,10);
     %Allocate memory for variables
     numAlphas = size(alpha,2);
     numRhos= size(rho,2);
