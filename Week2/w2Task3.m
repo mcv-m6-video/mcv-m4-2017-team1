@@ -1,5 +1,5 @@
-%Highway 1050 - 1350 
-%Fall 1460 - 1560 
+%Highway 1050 - 1350
+%Fall 1460 - 1560
 %Traffic 950 - 1050
 clear all
 clc
@@ -17,9 +17,9 @@ for seq=1:numel(iniFrame)
     Gauss=1:6;
     numGauss=size(Gauss,2);
     
-    precision = zeros(1,numGauss); recall = zeros(1,numGauss); 
+    precision = zeros(1,numGauss); recall = zeros(1,numGauss);
     accuracy = zeros(1,numGauss); FMeasure = zeros(1,numGauss);
-
+    
     TPTotal=zeros(1,numGauss);FPTotal=zeros(1,numGauss);
     TNTotal=zeros(1,numGauss);FNTotal=zeros(1,numGauss);
     
@@ -27,15 +27,15 @@ for seq=1:numel(iniFrame)
     FilesGroundtruth = dir(char(strcat(groundtruthPath(seq), '*png')));
     
     for k=Gauss
-    numGaus=k;  
-    detector = vision.ForegroundDetector('NumTrainingFrames',((endFrame(seq)-iniFrame(seq))/2), 'NumGaussians',numGaus, 'InitialVariance',30^2) ;
+        numGaus=k;
+        detector = vision.ForegroundDetector('NumTrainingFrames',((endFrame(seq)-iniFrame(seq))/2), 'NumGaussians',numGaus, 'InitialVariance',30^2) ;
         for i = iniFrame(seq):(iniFrame(seq)+(endFrame(seq)-iniFrame(seq))/2)
             image = imread(strcat(char(sequencePath(seq)),FilesInput(i).name));
             %grayscale = double(rgb2gray(image));
             grayscale=image;% read the next video frame
             foreground = step(detector, grayscale);
         end
-    
+        
         for i=iniFrame(seq)+(endFrame(seq)-iniFrame(seq))/2+1:endFrame(seq)
             image = imread(strcat(char(sequencePath(seq)),FilesInput(i).name));
             %grayscale = double(rgb2gray(image));
@@ -45,10 +45,10 @@ for seq=1:numel(iniFrame)
             if seq==2
                 se = strel('disk',3);
             else
-                se = strel('disk',1);   
+                se = strel('disk',1);
             end
             foreground=imopen(foreground,se);
-        
+            
             [TP,FP,TN,FN] = computePerformance(groundtruth, foreground);
             TPTotal(k)=TPTotal(k)+TP;
             FPTotal(k)=FPTotal(k)+FP;
@@ -64,9 +64,9 @@ for seq=1:numel(iniFrame)
         vec(seq,k,6)=FPTotal(k);
         vec(seq,k,7)=TNTotal(k);
         vec(seq,k,8)=FNTotal(k);
-
+        
     end
-  
+    
 end
 
 
@@ -74,7 +74,7 @@ toc
 %Plot some figures
 
 %Precision
-figure(); 
+figure();
 for seq=1:numel(iniFrame)
     plot(Gauss, vec(seq,:,1))
     hold on
@@ -84,7 +84,7 @@ title('Precision for the 3 sequences'); xlabel('Gauss'); ylabel('Precision')
 legend('Highway','Traffic','Fall'); ylim([0 1])
 
 %Recall
-figure(); 
+figure();
 for seq=1:numel(iniFrame)
     plot(Gauss, vec(seq,:,2))
     hold on
