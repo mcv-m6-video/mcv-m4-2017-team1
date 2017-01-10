@@ -1,7 +1,7 @@
 function newStdDev = add2StdDev(mean, stdDev, newValue, newMean, newN,mask)
 
 %Compute the deviation when adding a new element
-newStdDev = sqrt( ((newN-2).*stdDev.^2 + (newValue-newMean).*(newValue-mean)) ./ (newN-1) );
+newStdDev = sqrt( ((newN-1).*stdDev.^2 + (newValue-newMean).*(newValue-mean)) ./ (newN) );
 
 %Put to 0 those values that are Inf or NaN (if the deviation is divided by
 %0 or is 0/0)
