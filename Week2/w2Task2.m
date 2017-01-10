@@ -22,9 +22,9 @@ for seq=1:3
     
     %Define the range of alpha
     if seq==1
-        alpha= 0:30;
+        alpha= linspace (0,30,31);
     else
-        alpha=0:30;
+        alpha=linspace (0,30,31);
     end
     %Define the range of rho
     rho=0:0.1:1;
