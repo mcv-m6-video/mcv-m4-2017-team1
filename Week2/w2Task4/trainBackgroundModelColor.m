@@ -6,8 +6,8 @@ FilesGroundtruth = dir(strcat(groundtruthPath, '*png'));
 
 %Read the first image and convert it to grayscale
 image = imread(strcat(sequencePath,FilesInput(iniFrame).name));
-%grayscale = double(image);                     %RGB color space
-color_image = double(ConvertRGBtoYUV(image));     %YUV Color Space
+% color_image= double(image);                     %RGB color space
+ color_image = double(ConvertRGBtoYUV(image));     %YUV Color Space
 
 %Create a mask of the pixels to take into account in the computation of the
 %mean and deviation (those that belong to the background, with a value of 0)
