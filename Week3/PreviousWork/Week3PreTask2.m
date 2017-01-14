@@ -45,7 +45,7 @@ FilesGroundtruth = dir(char(strcat(groundtruthPath(seq), '*png')));
 %negative values
 k=0;
 l=0;
-conn=(4,8);
+
 if video==1 
     NFrames=length(FilesInput);
     figure();
@@ -77,7 +77,7 @@ for al = alpha
       
         %Detect foreground objects
         [detection,means,deviations] = detectForeground_adaptive(grayscale, means, deviations,al,r);
-        detection=imfill(detection,conn,'holes');
+        
        if video==1
             subplot(2,3,1); imshow(uint8(grayscale));
             title('Sequence')
