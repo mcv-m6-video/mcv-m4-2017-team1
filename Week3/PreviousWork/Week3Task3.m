@@ -7,8 +7,8 @@ clear all
 video=1;
 tic
 %Paths to the input images and their groundtruth
-sequencePath = {'../Archivos/highway/input/' '../Archivos/traffic/traffic/input/' '../Archivos/fall/fall/input/'} ;
-groundtruthPath = {'../Archivos/highway/groundtruth/' '../Archivos/traffic/traffic/groundtruth/' '../Archivos/fall/fall/groundtruth/'};
+sequencePath = {'datasets/highway/input/' 'datasets/traffic/input/' 'datasets/fall/input/'} ;
+groundtruthPath = {'datasets/highway/groundtruth/' 'datasets/traffic/groundtruth/' 'datasets/fall/groundtruth/'};
 %Initial and final frame of the sequence
 iniFrame = [1050 950 1460];
 endFrame = [1350 1050 1560];
