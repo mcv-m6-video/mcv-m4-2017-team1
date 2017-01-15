@@ -3,16 +3,16 @@
 %Traffic 950 - 1050
 close all
 
-video=1;
+video=0;
 tic
 %Paths to the input images and their groundtruth
-sequencePath = {'../Archivos/highway/input/' '../Archivos/traffic/traffic/input/' '../Archivos/fall/fall/input/'} ;
-groundtruthPath = {'../Archivos/highway/groundtruth/' '../Archivos/traffic/traffic/groundtruth/' '../Archivos/fall/fall/groundtruth/'};
+sequencePath = {'datasets/highway/input/' 'datasets/traffic/input/' 'datasets/fall/input/'} ;
+groundtruthPath = {'datasets/highway/groundtruth/' 'datasets/traffic/groundtruth/' 'datasets/fall/groundtruth/'};
 %Initial and final frame of the sequence
 iniFrame = [1050 950 1460];
 endFrame = [1350 1050 1560];
 
-for seq=1
+for seq=2:numel(iniFrame)
     disp(['Sequence ' num2str(seq)])
 %Train the background model with the first half of the sequence
 [means, deviations] = trainBackgroundModelAllPix(char(sequencePath(seq)), char(groundtruthPath(seq)), iniFrame(seq), (endFrame(seq)-iniFrame(seq))/2);
@@ -24,10 +24,10 @@ for seq=1
 if seq==1
 alpha= 3;
 else
-alpha=1:10;
+alpha=0:10;
 end
 %Define the range of rho
-rho=0.22;
+rho=linspace(0,1,10);
 %Allocate memory for variables
 numAlphas = size(alpha,2);
 numRhos= size(rho,2);
@@ -45,7 +45,7 @@ FilesGroundtruth = dir(char(strcat(groundtruthPath(seq), '*png')));
 %negative values
 k=0;
 l=0;
-conn=(4,8);
+%conn=(4,8);
 if video==1 
     NFrames=length(FilesInput);
     figure();
@@ -77,7 +77,7 @@ for al = alpha
       
         %Detect foreground objects
         [detection,means,deviations] = detectForeground_adaptive(grayscale, means, deviations,al,r);
-        detection=imfill(detection,conn,'holes');
+    %    detection=imfill(detection,conn,'holes');
        if video==1
             subplot(2,3,1); imshow(uint8(grayscale));
             title('Sequence')
@@ -172,12 +172,12 @@ disp(['Alpha: ' num2str(alpha(n)) ', Rho: ' num2str(rho(m)) ' with Fmeasure ' nu
 wp_seq1=[m,n];
 disp ('Best parameters for sequence 2')
 ind=find(vec_seq2(:,:,4)==max(max(vec_seq2(:,:,4))));
-[m,n]=ind2sub(size(vec_seq1(:,:,4)),ind);
+[m,n]=ind2sub(size(vec_seq2(:,:,4)),ind);
 disp(['Alpha: ' num2str(alpha(n)) ', Rho: ' num2str(rho(m)) ' with Fmeasure ' num2str(vec_seq2(m,n,4))])
 wp_seq2=[m,n];
 disp ('Best parameters for sequence 3')
 ind=find(vec_seq3(:,:,4)==max(max(vec_seq3(:,:,4))));
-[m,n]=ind2sub(size(vec_seq1(:,:,4)),ind);
+[m,n]=ind2sub(size(vec_seq3(:,:,4)),ind);
 disp(['Alpha: ' num2str(alpha(n)) ', Rho: ' num2str(rho(m)) ' with Fmeasure ' num2str(vec_seq3(m,n,4))])
 wp_seq3=[m,n];
 % F-measure plot comparison adaptive vs non-adaptive
