@@ -6,14 +6,14 @@ FilesGroundtruth = dir(strcat(groundtruthPath, '*png'));
 
 %Read the first image and convert it to grayscale
 image = imread(strcat(sequencePath,FilesInput(iniFrame).name));
-% color_image= double(image);                     %RGB color space
-color_image = double(ConvertRGBtoYUV(image));     %YUV Color Space
+color_image= double(image);                     %RGB color space
+%color_image = double(ConvertRGBtoYUV(image));     %YUV Color Space
 
 %Create a mask of the pixels to take into account in the computation of the
 %mean and deviation (those that belong to the background, with a value of 0)
-mask = double(imread(strcat(groundtruthPath,FilesGroundtruth(iniFrame).name)))==0;
+%mask = double(imread(strcat(groundtruthPath,FilesGroundtruth(iniFrame).name)))==0;
 %Uncomment to use all the pixels to compute the mean and deviation
-%mask = ones(size(grayscale));
+mask = ones(size(color_image,1),size(color_image,2));
 
 for k=1:size(color_image,3)
     %Initialize the mean and deviation of each pixel, only using those pixels
@@ -33,14 +33,15 @@ for k=1:size(color_image,3)
     for i = iniFrame+1:iniFrame+numFrames
         %Read an image and convert it to grayscale
         image = imread(strcat(sequencePath,FilesInput(i).name));
-        %grayscale = double(image);                     %RGB color space
-        color_image = double(ConvertRGBtoYUV(image));     %YUV Color Space
+        grayscale = double(image);                     %RGB color space
+        %color_image = double(ConvertRGBtoYUV(image));     %YUV Color Space
+        %color_image = rgb2hsv(double(image));
         
         %Create a mask of the pixels to take into account in the computation of the
         %mean and deviation
-        mask = double(imread(strcat(groundtruthPath,FilesGroundtruth(i).name)))==0;
+        %mask = double(imread(strcat(groundtruthPath,FilesGroundtruth(i).name)))==0;
         %Uncomment to use all the pixels to compute the mean and deviation
-        %mask = ones(size(grayscale));
+        mask =  ones(size(grayscale,1),size(grayscale,2));
         
         %The number of frames taken into account to compute the mean and
         %deviation of a pixel increases if the pixel belongs to the background
@@ -59,12 +60,12 @@ for k=1:size(color_image,3)
         pixelMean = [pixelMean newMean(pixel(1),pixel(2),k)];
         pixelDev = [pixelDev newDev(pixel(1),pixel(2),k)];
         
-        plot(1:i-iniFrame,pixelMean)
-        hold on;
-        plot(1:i-iniFrame,pixelGray)
-        plot(1:i-iniFrame,pixelDev)
-        hold off;
-        drawnow();
+        %plot(1:i-iniFrame,pixelMean)
+        %hold on;
+        %plot(1:i-iniFrame,pixelGray)
+        %plot(1:i-iniFrame,pixelDev)
+        %hold off;
+        %drawnow();
     end
 end
 

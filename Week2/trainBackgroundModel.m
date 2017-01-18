@@ -12,9 +12,9 @@ image = imread(strcat(sequencePath,FilesInput(iniFrame).name));
 grayscale = double(rgb2gray(image));
 %Create a mask of the pixels to take into account in the computation of the
 %mean and deviation (those that belong to the background, with a value of 0)
-mask = double(imread(strcat(groundtruthPath,FilesGroundtruth(iniFrame).name)))==0;
+%mask = double(imread(strcat(groundtruthPath,FilesGroundtruth(iniFrame).name)))==0;
 %Uncomment to use all the pixels to compute the mean and deviation
-%mask = ones(size(grayscale));
+mask = ones(size(grayscale));
 
 %Initialize the mean and deviation of each pixel, only using those pixels
 %where the mask is 1 (pixels belonging to the background, with value 0)
@@ -47,9 +47,9 @@ for i = iniFrame+1:iniFrame+numFrames
     end
     %Create a mask of the pixels to take into account in the computation of the
     %mean and deviation
-    mask = double(imread(strcat(groundtruthPath,FilesGroundtruth(i).name)))==0;
+    %mask = double(imread(strcat(groundtruthPath,FilesGroundtruth(i).name)))==0;
     %Uncomment to use all the pixels to compute the mean and deviation
-    %mask = ones(size(grayscale));
+    mask = ones(size(grayscale));
     
     %The number of frames taken into account to compute the mean and
     %deviation of a pixel increases if the pixel belongs to the background
