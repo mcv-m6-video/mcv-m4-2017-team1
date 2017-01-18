@@ -67,6 +67,8 @@ for seq=1:numel(iniFrame)
         for al = alpha
             k=k+1;
             disp(['Iteration with alpha ' num2str(al) ' index k ' num2str(k) '. Pixels ' num2str(Pixels) ' with index p ' num2str(p)]);
+            means=na_means;
+            deviations= na_deviations;
           
             %Detect foreground objects in the second half of the sequence
             for i = iniFrame(seq)+(endFrame(seq)-iniFrame(seq))/2+1:endFrame(seq)
@@ -149,7 +151,7 @@ plot(P,auc_seq3,'r')
 hold off
 
 title('AUC vs Pixels (P)'); xlabel('Pixels(P)'); ylabel('AUC')
-legend('Highway (adaptive, rho=0.22)','Traffic (adaptive, rho=0.22)','Fall (adaptive,rho=0.11)');% axis([0 1 0 1])
+legend('Highway (adaptive, rho=0.22)','Traffic (adaptive, rho=0.22)','Fall (adaptive,rho=0.11)');axis([0 1 0 1])
 
 
 %Find best AUC separately for every sequence
