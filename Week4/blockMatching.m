@@ -9,8 +9,8 @@ blockSize = [20,20];
 lenSearch = 20;
 
 %Matrices to store the movement in the i and j direction of each block
-motion_i = zeros(ceil(size(currentFrame)/blockSize(1)));
-motion_j = zeros(ceil(size(currentFrame)/blockSize(2)));
+motion_i = zeros(size(currentFrame));
+motion_j = zeros(size(currentFrame));
 
 %Resulting image, created with the matching blocks of the previous frame 
 resultImage = zeros(size(currentFrame));
@@ -53,8 +53,8 @@ for i = 1:blockSize(1):size(currentFrame,1)
                 
                 if e < minEnergy
                     minEnergy = e;
-                    motion_i(i,j) = i-i+stepi;
-                    motion_j(i,j) = j-j+stepj;
+                    motion_i(i,j) = stepi;
+                    motion_j(i,j) = stepj;
                     resultImage(i:i+blockSize(1)-1, j:j+blockSize(2)-1) = previousBlock;
                     
                     if plot_progress == 1
