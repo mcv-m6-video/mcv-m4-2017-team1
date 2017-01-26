@@ -57,8 +57,8 @@ for i = 1:blockSize(1):size(currentFrame,1)
             drawnow()
         end
         
-        % Initialize the minimum energy
-        minEnergy = 1000000000;
+        % Initialize the minimum error
+        minError = 1000000000;
         
         %Avoid iterations where an index goes out of the border of
         %the image
@@ -98,8 +98,8 @@ for i = 1:blockSize(1):size(currentFrame,1)
                 previousBlock = previousFrame(i+stepi:i+stepi+blockSize(1)-1,...
                                               j+stepj:j+stepj+blockSize(2)-1);
                                        
-                % Compute the energy between the two blocks                          
-                e = computeEnergy(previousBlock,currentBlock);
+                % Compute the error between the two blocks                          
+                e = computeError(previousBlock,currentBlock);
                 
                 if plot_progress == 1
                     figure(2)
@@ -110,11 +110,11 @@ for i = 1:blockSize(1):size(currentFrame,1)
                     drawnow()
                 end
                 
-                % If the energy is smaller than the minumum one ( = most 
+                % If the error is smaller than the minumum one ( = most 
                 % similar block), save it
-                if e < minEnergy
-                    % Save the minimum energy
-                    minEnergy = e;
+                if e < minError
+                    % Save the minimum error
+                    minError = e;
     
                     % Save the motion of the most 
                     motion_i(i:i+blockSize(1)-1,j:j+blockSize(2)-1) = stepi;
