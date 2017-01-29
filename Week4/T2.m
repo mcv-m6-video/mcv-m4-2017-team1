@@ -44,8 +44,15 @@ for i = iniFrame(seq):endFrame(seq)
 
     [resultImage, motion_i, motion_j] = blockMatching_b(previousFrame, grayscale);
     %display('""""""""""""""""""')
-    mo_i = mean2(motion_i(~isnan(motion_i)));
-    mo_j = mean2(motion_j(~isnan(motion_j)));
+    
+    moi = reshape(motion_i, 1, size(motion_i,1)*size(motion_i,2));
+    moj = reshape(motion_j, 1, size(motion_j,1)*size(motion_j,2));
+
+    mo_i = median(moi);
+    mo_j = median(moj);
+    
+    %mo_i = mean2(motion_i(~isnan(motion_i)));
+    %mo_j = mean2(motion_j(~isnan(motion_j)));
     
     trans = imtranslate(grayscale,[mo_j,mo_i]);
     figure(1)
