@@ -28,6 +28,7 @@ pixelGray=[]; pixelMean=[]; pixelDev=[];
 pixel = [200,65]; %75,155
 % figure(1)
 
+
 for i = iniFrame+1:iniFrame+numFrames
     %Read an image and convert it to grayscale
     image = imread(strcat(sequencePath,FilesInput(i).name));
@@ -44,13 +45,13 @@ for i = iniFrame+1:iniFrame+numFrames
     newN = newN + mask;
     
     %Stabilize the grayscale image
-    [grayscaleBad, motioni, motionj]= blockMatchingGray(grayscaleBefore,grayscaleAfter);
-    grayscaleBefore=grayscaleAfter;
+    [grayscaleBad, motioni, motionj]= blockMatching_b(grayscaleBefore,grayscaleAfter);
     
-	[x1, y1] = meshgrid(1:size(grayscaleAfter,2), 1:size(grayscaleAfter,1));
-	a=mean(mean(motioni));
-	b=mean(mean(motionj));
-	grayscale = interp2((grayscaleAfter), x1+a, y1+b);
+	%[x1, y1] = meshgrid(1:size(grayscaleAfter,2), 1:size(grayscaleAfter,1));
+    mo_i = median(median(motioni(~isnan(motioni))));
+    mo_j = median(median(motionj(~isnan(motionj))));
+	grayscale = imtranslate(grayscaleAfter,[mo_j,mo_i]);
+    grayscaleBefore=grayscale;
     
     %Compute the mean and deviation when we add a new element
     newMean = add2Mean(oldMean, grayscale, newN,mask);

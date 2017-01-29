@@ -83,13 +83,20 @@ for al = 4
             old_deviations=deviations;
             
             %Stabilize the grayscale image
-            [grayscaleBad, motioni, motionj]= blockMatchingGray(grayscaleBefore,grayscaleAfter);
-            grayscaleBefore=grayscaleAfter;
+            [grayscaleBad, motioni, motionj]= blockMatching_b(grayscaleBefore,grayscaleAfter);
             
-            [x1, y1] = meshgrid(1:size(grayscaleAfter,2), 1:size(grayscaleAfter,1));
-            a=mean(mean(motioni));
-            b=mean(mean(motionj));
-            grayscale = interp2((grayscaleAfter), x1+a, y1+b);
+            
+            %[x1, y1] = meshgrid(1:size(grayscaleAfter,2), 1:size(grayscaleAfter,1));
+            mo_i = median(median(motioni(~isnan(motioni))));
+            mo_j = median(median(motionj(~isnan(motionj))));
+            
+            %grayscale = interp2((grayscaleAfter), x1+a, y1+b);
+            grayscale = imtranslate(grayscaleAfter,[mo_j,mo_i]);
+            grayscaleBefore=grayscale;
+            
+            groundtruth = imtranslate((groundtruth), [mo_j,mo_i]);
+            Nans=isnan(groundtruth);
+            groundtruth(Nans==1)=0;
             
             %Detect foreground objects
             [detection,means,deviations] = detectForeground_adaptive(grayscale, means, deviations,al,rho);
@@ -119,12 +126,12 @@ for al = 4
             FNTotal(k)=FNTotal(k)+FN;
         
             if video==1
-                subplot(2,1,1); imshow(uint8(grayscale));
+                subplot(1,3,1); imshow(uint8(grayscale));
                 title('Sequence')
-                subplot(2,1,2); imshow(logical((detection)));
+                subplot(1,3,2); imshow(logical((detection)));
                 title('Highway Seq. 8th Connectivity')
-                %subplot(2,3,2); imshow(uint8(means));
-                %title ('Background mean')
+                subplot(1,3,3); imshow(groundtruth);
+                title ('Background mean')
                 %subplot(2,3,5); imagesc(uint8(old_means-means));
                 %colorbar;
                 %title('Mean difference between frames')
