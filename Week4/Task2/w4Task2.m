@@ -12,7 +12,7 @@ endFrame = [1050];
 
 disp(['Sequence Traffic'])
 
-[means, deviations] = trainBackgroundWithStabilization(char(sequencePath), char(groundtruthPath), iniFrame, (endFrame-iniFrame)/2);
+[means, deviations] = trainBackgroundModelAllPix(char(sequencePath), char(groundtruthPath), iniFrame, (endFrame-iniFrame)/2);
  na_means=means;
  na_deviations=deviations;
  
@@ -81,7 +81,7 @@ for al = 4
             %%%%% groundtruth = double(imread(strcat(groundtruthPath,FilesGroundtruth(i).name))) > 169;
             old_means=means;
             old_deviations=deviations;
-            
+            i
             %Stabilize the grayscale image
             [grayscaleBad, motioni, motionj]= blockMatching_b(grayscaleBefore,grayscaleAfter);
             
@@ -95,12 +95,14 @@ for al = 4
             grayscaleBefore=grayscale;
             
             groundtruth = imtranslate((groundtruth), [mo_j,mo_i]);
-            Nans=isnan(groundtruth);
-            groundtruth(Nans==1)=0;
+            %Nans=isnan(groundtruth);
+            %groundtruth(Nans==1)=0;
             
             %Detect foreground objects
             [detection,means,deviations] = detectForeground_adaptive(grayscale, means, deviations,al,rho);
             [detectionold, ~,~]=detectForeground_adaptive(grayscaleBefore,means,deviations,al,rho);
+            
+            detection(grayscale==0)=0;
             
             %Connectivity
             detection=imfill(detection,conn,'holes');
@@ -129,7 +131,7 @@ for al = 4
                 subplot(1,3,1); imshow(uint8(grayscale));
                 title('Sequence')
                 subplot(1,3,2); imshow(logical((detection)));
-                title('Highway Seq. 8th Connectivity')
+                title('Highway Detection with Morph')
                 subplot(1,3,3); imshow(groundtruth);
                 title ('Background mean')
                 %subplot(2,3,5); imagesc(uint8(old_means-means));
