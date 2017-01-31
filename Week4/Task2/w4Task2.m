@@ -65,8 +65,9 @@ end
 %Read the first image and convert it to grayscale
 image = imread(strcat(char(sequencePath),FilesInput(iniFrame+(endFrame-iniFrame)/2).name));
 grayscaleBefore = double(rgb2gray(image));
-
-for al = 3
+for seq=1:2
+    k=0;
+for al = alpha
     deviations=na_deviations;
     means=na_means;
     k=k+1
@@ -82,22 +83,25 @@ for al = 3
             old_means=means;
             old_deviations=deviations;
             i
-            %Stabilize the grayscale image
-            [grayscaleBad, motioni, motionj]= blockMatching_b(grayscaleBefore,grayscaleAfter);
+            if seq==1
+                %Stabilize the grayscale image
+                [grayscaleBad, motioni, motionj]= blockMatching_b(grayscaleBefore,grayscaleAfter);
             
             
-            %[x1, y1] = meshgrid(1:size(grayscaleAfter,2), 1:size(grayscaleAfter,1));
-            mo_i = median(median(motioni(~isnan(motioni))));
-            mo_j = median(median(motionj(~isnan(motionj))));
+                %[x1, y1] = meshgrid(1:size(grayscaleAfter,2), 1:size(grayscaleAfter,1));
+                mo_i = median(median(motioni(~isnan(motioni))));
+                mo_j = median(median(motionj(~isnan(motionj))));
             
-            %grayscale = interp2((grayscaleAfter), x1+a, y1+b);
-            grayscale = imtranslate(grayscaleAfter,[mo_j,mo_i],'FillValues',111);
-            grayscaleBefore=grayscale;
+                %grayscale = interp2((grayscaleAfter), x1+a, y1+b);
+                grayscale = imtranslate(grayscaleAfter,[mo_j,mo_i]);
+                grayscaleBefore=grayscale;
             
-            groundtruth = imtranslate((groundtruth), [mo_j,mo_i],'FillValues',111);
-            %Nans=isnan(groundtruth);
-            %groundtruth(Nans==1)=0;
-            
+                groundtruth = imtranslate((groundtruth), [mo_j,mo_i]);
+                %Nans=isnan(groundtruth);
+                %groundtruth(Nans==1)=0;
+            else
+                grayscale=grayscaleAfter;
+            end
             %Detect foreground objects
             [detection,means,deviations] = detectForeground_adaptive(grayscale, means, deviations,al,rho);
             [detectionold, ~,~]=detectForeground_adaptive(grayscaleBefore,means,deviations,al,rho);
@@ -105,11 +109,11 @@ for al = 3
             detection(grayscale==0)=0;
             
             %Connectivity
-            %detection=imfill(detection,conn,'holes');
+            detection=imfill(detection,conn,'holes');
             
             %Choose Morph Operator
             %detection=imclose(detection,SE);   %closing
-            %detection=imopen(detection,SE);    %opening
+            detection=imopen(detection,SE);    %opening
             %detection=imdilate(detection,SE);   %dilation
             %detection=imerode(detection,SE);   %erosion
             
@@ -156,12 +160,12 @@ for al = 3
         %Compute the performance of the detector for the whole sequence
     [precision(k),recall(k),accuracy(k),FMeasure(k)] = computeMetrics(TPTotal(k),FPTotal(k),TNTotal(k),FNTotal(k));
           
-    vec(1,k,1)=precision(k);
-    vec(1,k,2)=recall(k);
-    vec(1,k,3)=accuracy(k);
-    vec(1,k,4)=FMeasure(k);
+    vec(seq,k,1)=precision(k);
+    vec(seq,k,2)=recall(k);
+    vec(seq,k,3)=accuracy(k);
+    vec(seq,k,4)=FMeasure(k);
 end
-
+end
 
 if video==1
     %Close video object
@@ -170,55 +174,56 @@ end
 toc
 %Precision
 figure(); 
-for seq=1
+for seq=1:2
     plot(alpha, vec(seq,:,1))
     hold on
 end
 hold off
 title('Precision for the Traffic sequences'); xlabel('Alpha'); ylabel('Precision')
-legend('Traffic'); ylim([0 1])
+legend('Stab', 'No Stab'); ylim([0 1])
 
 %Recall
 figure(); 
-for seq=1
+for seq=1:2
     plot(alpha, vec(seq,:,2))
     hold on
 end
 hold off
 title('Recall for the Traffic sequences'); xlabel('Alpha'); ylabel('Recall')
-legend('Traffic'); ylim([0 1])
+legend('Stab', 'No Stab'); ylim([0 1])
 
 %Precision-Recall
 figure()
-for seq=1
+for seq=1:2
     plot(vec(seq,:,2),vec(seq,:,1))
     hold on
 end
 hold off
 title('P-R curve for the Traffic sequences'); xlabel('Recall'); ylabel('Precision')
-legend('Traffic'); axis([0 1 0 1])
+legend('Stab', 'No Stab'); axis([0 1 0 1])
 
 %F Measure
 figure();
-for seq=1
+for seq=1:2
     plot(alpha, vec(seq,:,4))
     hold on;
 end
 hold off;
 title('Fmeasure for the Traffic sequences'); xlabel('Alpha'); ylabel('Fmeasure')
-legend('Traffic'); ylim([0 1])
+legend('Stab', 'No Stab'); ylim([0 1])
 
-for seq=1
+for seq=1:2
     [F1,alphas]=max(vec(seq,:,4));
     disp(['F1 & alpha for sequence Traffic ' ': ' num2str(F1) ', ' num2str(alphas-1)] )
 end
 
-for seq=1
+for seq=1:2
     auc(seq)=trapz(vec(seq,:,1),vec(seq,:,2));
     disp(['AUC for sequence Traffic ' ': ' num2str(auc(seq))] )
 end
 
-disp(['Median AUC : ' num2str((sum(auc))/3)] )
+disp(['Median AUC sequence with stab: ' num2str((sum(auc(1)))/3)] )
+disp(['Median AUC sequence without stab: ' num2str((sum(auc(2)))/3)] )
             
 
  
