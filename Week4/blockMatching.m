@@ -1,8 +1,8 @@
 function [resultImage, motion_i, motion_j] = blockMatching(previousFrame, currentFrame,bs,len)
 
 plot_progress=0;
-plot_block_search=1;
-video=1;
+plot_block_search=0;
+video=0;
 % Save the original images, needed for the plots and resultImage
 previousFrame_rgb = previousFrame;
 currentFrame_rgb = currentFrame;
@@ -36,10 +36,11 @@ if video==1
 end
 %% Backward block matching
 if plot_block_search==1
-   figure(1)
-   subplot(2,2,1); imshow(uint8(previousFrame_rgb)); title('Previous Frame');
-   subplot(2,2,2); imshow(uint8(currentFrame_rgb)); title('Current Frame');
-   subplot(2,2,3:4); imshow(uint8(resultImage)); title('Result image');
+     FigHandle = figure(1);
+   set(FigHandle, 'Position', [100, 100, 1049, 895]);
+   subplot(2,2,1:2); imshow(uint8(previousFrame_rgb)); title('Previous Frame');
+   subplot(2,2,3); imshow(uint8(currentFrame_rgb)); title('Current Frame');
+   subplot(2,2,4); imshow(uint8(resultImage)); title('Result image');
    drawnow()
    rect_blue_0=[];
    rect_blue=[];
@@ -53,13 +54,13 @@ for i = 1:blockSize(1):size(currentFrame,1)
     
     for j = 1:blockSize(2):size(currentFrame,2)
         if plot_block_search==1
-            figure(1); subplot(2,2,1);
+            figure(1); subplot(2,2,1:2);
             delete(rect_blue_0)
             rect_blue_0 = rectangle('Position',[j,i, blockSize(2),blockSize(1)],'EdgeColor', 'b');
-            figure(1); subplot(2,2,2);
+            figure(1); subplot(2,2,3);
             delete(rect_blue)
             rect_blue = rectangle('Position',[j,i, blockSize(2),blockSize(1)],'EdgeColor', 'b');
-            figure(1); subplot(2,2,3:4);
+            figure(1); subplot(2,2,4);
             delete(rect_blue2)
             rect_blue2 = rectangle('Position',[j,i, blockSize(2),blockSize(1)],'EdgeColor', 'b'); 
             drawnow()
@@ -101,7 +102,7 @@ for i = 1:blockSize(1):size(currentFrame,1)
                 end
                 
                 if plot_block_search==1
-                    figure(1); subplot(2,2,1);
+                    figure(1); subplot(2,2,1:2);
                     delete(rect_red)
                     rect_red = rectangle('Position',[j+stepj,i+stepi, blockSize(2),blockSize(1)],'EdgeColor', 'r');
                     drawnow()
@@ -121,9 +122,9 @@ for i = 1:blockSize(1):size(currentFrame,1)
                 
                 if plot_progress == 1
                     figure(2)
-                    subplot(2,2,1)
+                    subplot(2,2,1:2)
                     imshow(uint8(currentBlock))
-                    subplot(2,2,2)
+                    subplot(2,2,3)
                     imshow(uint8(previousBlock))
                     drawnow()
                 end
@@ -146,7 +147,7 @@ for i = 1:blockSize(1):size(currentFrame,1)
                     
                     if plot_block_search == 1
                         figure(1)
-                        subplot(2,2,3:4); imshow(uint8(resultImage)); title('Result image');
+                        subplot(2,2,4); imshow(uint8(resultImage)); title('Result image');
                         drawnow()
                            if video==1
                                 F(ind) = getframe(gcf);
