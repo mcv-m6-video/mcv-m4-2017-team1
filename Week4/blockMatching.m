@@ -1,8 +1,8 @@
 function [resultImage, motion_i, motion_j] = blockMatching(previousFrame, currentFrame,bs,len)
 
 plot_progress=0;
-plot_block_search=1;
-video=1;
+plot_block_search=0;
+video=0;
 % Save the original images, needed for the plots and resultImage
 previousFrame_rgb = previousFrame;
 currentFrame_rgb = currentFrame;

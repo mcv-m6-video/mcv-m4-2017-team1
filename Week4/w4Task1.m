@@ -53,10 +53,10 @@ ind=1;
 %     hold off;
 %     title('Optical flow sequence 45')
 %     %MSEN
-    msen_F1= sqrt((motioni-GT_157(:,:,1)).^2+(motionj-GT_157(:,:,2)).^2);
+    msen_F1= sqrt((motionj-GT_157(:,:,1)).^2+(motioni-GT_157(:,:,2)).^2);
     msen_F1(~logical(GT_157(:,:,3)))=0;
     
-    msen_F2= sqrt((motioni_-GT_45(:,:,1)).^2+(motionj_-GT_45(:,:,2)).^2);
+    msen_F2= sqrt((motionj_-GT_45(:,:,1)).^2+(motioni_-GT_45(:,:,2)).^2);
     msen_F2(~logical(GT_45(:,:,3)))=0;
     
     msen_F1_LK= sqrt((flow_157_LK.Vx-GT_157(:,:,1)).^2+(flow_157_LK.Vy-GT_157(:,:,2)).^2);
