@@ -1,7 +1,7 @@
 close all
 clear all
 
-video=1;
+video=0;
 tic
 %Paths to the input images and their groundtruth
 sequencePath = {'../Archivos/traffic/traffic/input/'} ;
@@ -12,7 +12,7 @@ endFrame = [1050];
 
 disp(['Sequence Traffic'])
 
-[means, deviations] = trainBackgroundWithStabilization(char(sequencePath), char(groundtruthPath), iniFrame, (endFrame-iniFrame)/2);
+[means, deviations] = trainBackgroundWithStabilizationPointFeature(char(sequencePath), char(groundtruthPath), iniFrame, (endFrame-iniFrame)/2);
  na_means=means;
  na_deviations=deviations;
  
@@ -52,6 +52,8 @@ SE = strel('line',20,30);  %len es llargada i deg els graus
 conn=4;
 %conn=8
 
+
+
 if video==1 
     NFrames=length(FilesInput);
     figure();
@@ -64,7 +66,10 @@ end
 
 %Read the first image and convert it to grayscale
 image = imread(strcat(char(sequencePath),FilesInput(iniFrame+(endFrame-iniFrame)/2).name));
-grayscaleBefore = double(rgb2gray(image));
+I=imsharpen(image,'Radius',20,'Amount',15);
+grayscaleBefore=rgb2gray(I);
+pointsBefore = detectFASTFeatures(grayscaleBefore);
+j=0;
 
 for al = 4
     deviations=na_deviations;
@@ -72,9 +77,11 @@ for al = 4
     k=k+1
     %Detect foreground objects in the second half of the sequence
         for i = iniFrame+(endFrame-iniFrame)/2+1:endFrame
+            j=j+1
             %Read an image and convert it to grayscale
             image = imread(strcat(char(sequencePath),FilesInput(i).name));
-            grayscaleAfter = double(rgb2gray(image));
+            I=imsharpen(image,'Radius',20,'Amount',15);
+            grayscaleAfter=rgb2gray(I);
             %Read the groundtruth image
             groundtruth = readGroundtruth(char(strcat(groundtruthPath,FilesGroundtruth(i).name)));  
             %%%%% --> better results if we count the hard shadows as foreground
@@ -82,25 +89,40 @@ for al = 4
             old_means=means;
             old_deviations=deviations;
             
-            %Stabilize the grayscale image
-            [grayscaleBad, motioni, motionj]= blockMatching_b(grayscaleBefore,grayscaleAfter);
+            %Extract corners
+            pointsAfter = detectFASTFeatures(grayscaleAfter);
             
+            %Estract FREAK descriptors
+            [featuresA, pointsA] = extractFeatures(grayscaleAfter, pointsAfter);
+            [featuresB, pointsB] = extractFeatures(grayscaleBefore, pointsBefore);
             
-            %[x1, y1] = meshgrid(1:size(grayscaleAfter,2), 1:size(grayscaleAfter,1));
-            mo_i = median(median(motioni(~isnan(motioni))));
-            mo_j = median(median(motionj(~isnan(motionj))));
+            %match the features from both images
+            indexPairs = matchFeatures(featuresA, featuresB);
+            pointsA = pointsA(indexPairs(:, 1), :);
+            pointsB = pointsB(indexPairs(:, 2), :);
             
+            if length(indexPairs)>3
             %grayscale = interp2((grayscaleAfter), x1+a, y1+b);
-            grayscale = imtranslate(grayscaleAfter,[mo_j,mo_i]);
-            grayscaleBefore=grayscale;
+                [tform, pointsBm, pointsAm] = estimateGeometricTransform(...
+                pointsB, pointsA, 'similarity');
             
-            groundtruth = imtranslate((groundtruth), [mo_j,mo_i]);
-            Nans=isnan(groundtruth);
-            groundtruth(Nans==1)=0;
+                grayscaleMoved = imwarp(grayscaleAfter, tform, 'OutputView', imref2d(size(grayscaleAfter)));
+                pointsMoved = transformPointsForward(tform, pointsAm.Location);
             
+                %recompute the before status
+                grayscaleBefore=grayscaleMoved;
+                pointsBefore = detectFASTFeatures(grayscaleBefore);
+            
+                gray=double(grayscaleMoved);
+            else
+                gray=double(grayscaleAfter);
+                grayscaleBefore=grayscaleAfter;
+            end
             %Detect foreground objects
-            [detection,means,deviations] = detectForeground_adaptive(grayscale, means, deviations,al,rho);
-            [detectionold, ~,~]=detectForeground_adaptive(grayscaleBefore,means,deviations,al,rho);
+            [detection,means,deviations] = detectForeground_adaptive(gray, means, deviations,al,rho);
+            %[detectionold, ~,~]=detectForeground_adaptive(grayscaleBefore,means,deviations,al,rho);
+            
+            %detection(grayscale==0)=0;
             
             %Connectivity
             detection=imfill(detection,conn,'holes');
@@ -126,7 +148,7 @@ for al = 4
             FNTotal(k)=FNTotal(k)+FN;
         
             if video==1
-                subplot(1,3,1); imshow(uint8(grayscale));
+                subplot(1,3,1); imshow(uint8(gray));
                 title('Sequence')
                 subplot(1,3,2); imshow(logical((detection)));
                 title('Highway Seq. 8th Connectivity')

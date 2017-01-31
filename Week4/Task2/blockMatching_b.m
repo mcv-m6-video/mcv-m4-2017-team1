@@ -1,15 +1,11 @@
-function [resultImage, motion_i, motion_j] = blockMatchingGray(previousFrame, currentFrame)
+function [resultImage, motion_i, motion_j] = blockMatching_b(previousFrame, currentFrame)
 
 plot_progress=0;
 plot_block_search=0;
 
-% Save the original images, needed for the plots and resultImage
-previousFrame_rgb = previousFrame;
-currentFrame_rgb = currentFrame;
-% Both frames are already in gray and in double
-%     previousFrame = (previousFrame);
-%     currentFrame = (currentFrame);
-
+% Convert both frames to double
+previousFrame = double(previousFrame);
+currentFrame = double(currentFrame);
 
 % %% Fast to see algorithm: [40,40], 10
 % %% ~Good performance (not optimal): [20,20] 20
@@ -17,7 +13,7 @@ currentFrame_rgb = currentFrame;
 blockSize = [40,40];
 % Define the area of search (lenSearch pixels beyond each of the limits of
 % the block)
-lenSearch = 10;
+lenSearch = 40;
 
 %Matrices to store the movement in the i and j direction of each block
 %(motion vectors)
@@ -25,13 +21,13 @@ motion_i = zeros(size(currentFrame));
 motion_j = zeros(size(currentFrame));
 
 %Resulting image, created with the matching blocks of the previous frame 
-resultImage = zeros(size(currentFrame_rgb));
+resultImage = zeros(size(currentFrame));
 
 %% Backward block matching
 if plot_block_search==1
    figure(1)
-   subplot(2,2,1); imshow(uint8(previousFrame_rgb)); title('Previous Frame');
-   subplot(2,2,2); imshow(uint8(currentFrame_rgb)); title('Current Frame');
+   subplot(2,2,1); imshow(uint8(previousFrame)); title('Previous Frame');
+   subplot(2,2,2); imshow(uint8(currentFrame)); title('Current Frame');
    subplot(2,2,3:4); imshow(uint8(resultImage)); title('Result image');
    drawnow()
    rect_blue_0=[];
@@ -39,6 +35,8 @@ if plot_block_search==1
    rect_blue2=[];
    rect_red=[];
 end
+
+minErrors=motion_i;
 % For each block in the current frame:
 for i = 1:blockSize(1):size(currentFrame,1)
     
@@ -114,16 +112,14 @@ for i = 1:blockSize(1):size(currentFrame,1)
                 if e < minError
                     % Save the minimum error
                     minError = e;
-    
+
                     % Save the motion of the most 
                     motion_i(i:i+blockSize(1)-1,j:j+blockSize(2)-1) = stepi;
                     motion_j(i:i+blockSize(1)-1,j:j+blockSize(2)-1) = stepj;
                     
-                    % Put the most similar block in the resulting image
-                    previousBlock_rgb = previousFrame_rgb(i+stepi:i+stepi+blockSize(1)-1,...
-                                              j+stepj:j+stepj+blockSize(2)-1,:);
-                                                                   
-                    resultImage(i:i+blockSize(1)-1, j:j+blockSize(2)-1,:) = previousBlock_rgb;
+                    minErrors(i:i+blockSize(1)-1,j:j+blockSize(2)-1) = minError;
+                    
+                    resultImage(i:i+blockSize(1)-1, j:j+blockSize(2)-1) = previousBlock;
                     
                     if plot_block_search == 1
                         figure(1)
@@ -144,4 +140,16 @@ for i = 1:blockSize(1):size(currentFrame,1)
         end
         
     end
+    
+end
+
+%figure(2)
+%minE = reshape(minErrors, 1, size(minErrors,1)*size(minErrors,2));
+%plot(minE)
+%ylim([0 10^6])
+%a =1;
+
+%motion_i(minErrors > 1*10^6) = NaN;
+%motion_j(minErrors > 1*10^6) = NaN;
+
 end
