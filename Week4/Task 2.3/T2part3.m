@@ -41,14 +41,14 @@ for i = iniFrame(seq):endFrame(seq)
     if i == iniFrame(seq)
         previousFrame = grayscale;
     end
-    k=k+1
-    %[resultImage, motion_i, motion_j] = blockMatching_b(previousFrame, grayscale);
+    i
+    [resultImage, motion_i, motion_j] = blockMatching_b(previousFrame, grayscale);
     %display('""""""""""""""""""')
-    %mo_i = median(median(motion_i(~isnan(motion_i))));
-    %mo_j = median(median(motion_j(~isnan(motion_j))));
+    mo_i = median(median(motion_i(~isnan(motion_i))));
+    mo_j = median(median(motion_j(~isnan(motion_j))));
     
-    %trans = imtranslate(image,[mo_j,mo_i]);
-    trans=image;
+    trans = imtranslate(image,[mo_j,mo_i]);
+    %trans=image;
     figure(1)
     %subplot(1,2,1)
     %imshow(uint8(grayscale));
