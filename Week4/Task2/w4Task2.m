@@ -1,7 +1,7 @@
 close all
 clear all
 
-video=1;
+video=0;
 tic
 %Paths to the input images and their groundtruth
 sequencePath = {'../Archivos/traffic/traffic/input/'} ;
@@ -66,7 +66,7 @@ end
 image = imread(strcat(char(sequencePath),FilesInput(iniFrame+(endFrame-iniFrame)/2).name));
 grayscaleBefore = double(rgb2gray(image));
 
-for al = 4
+for al = 3
     deviations=na_deviations;
     means=na_means;
     k=k+1
@@ -91,10 +91,10 @@ for al = 4
             mo_j = median(median(motionj(~isnan(motionj))));
             
             %grayscale = interp2((grayscaleAfter), x1+a, y1+b);
-            grayscale = imtranslate(grayscaleAfter,[mo_j,mo_i]);
+            grayscale = imtranslate(grayscaleAfter,[mo_j,mo_i],'FillValues',111);
             grayscaleBefore=grayscale;
             
-            groundtruth = imtranslate((groundtruth), [mo_j,mo_i]);
+            groundtruth = imtranslate((groundtruth), [mo_j,mo_i],'FillValues',111);
             %Nans=isnan(groundtruth);
             %groundtruth(Nans==1)=0;
             
@@ -105,11 +105,11 @@ for al = 4
             detection(grayscale==0)=0;
             
             %Connectivity
-            detection=imfill(detection,conn,'holes');
+            %detection=imfill(detection,conn,'holes');
             
             %Choose Morph Operator
             %detection=imclose(detection,SE);   %closing
-            detection=imopen(detection,SE);    %opening
+            %detection=imopen(detection,SE);    %opening
             %detection=imdilate(detection,SE);   %dilation
             %detection=imerode(detection,SE);   %erosion
             
