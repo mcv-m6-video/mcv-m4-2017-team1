@@ -11,11 +11,11 @@ GT_157=flow_read('datasets/LKFlow/training/flow_noc/000157_10.png');
 GT_45=flow_read('datasets/LKFlow/training/flow_noc/000045_10.png');
 ind2=1;
 
-%for b=10:10:70  
-for b=64
+for b=48  
+%for b=64
 ind=1;
-   % for l=20:20:100
    for l=20
+  % for l=20
     block_size=b;
     len=l;
     disp(['Block size ' num2str(block_size) ' with search length ' num2str(len)])
@@ -38,22 +38,22 @@ ind=1;
     flow_ = estimateFlow(opticFlow_,I_45);
     flow_45_LK = estimateFlow(opticFlow_,I_45_2);
     
-%     
-%     figure
-%     imshow(I_157_2);
-%     hold on;
-%     plot(comp_of_157,'DecimationFactor',[block_size block_size], 'ScaleFactor',2)
-%     hold off
-%     title ('Optical flow sequence 157')
-%     
-%     figure;
-%     imshow(I_45_2);
-%     hold on;
-%     plot(comp_of_45,'DecimationFactor',[block_size block_size], 'ScaleFactor',2)
-%     %quiver(X(:),Y(:),motioni,motionj,10);
-%     hold off;
-%     title('Optical flow sequence 45')
-%     %MSEN
+    
+    figure
+    imshow(I_157_2);
+    hold on;
+    plot(comp_of_157,'DecimationFactor',[block_size block_size], 'ScaleFactor',2)
+    hold off
+    title ('Optical flow sequence 157')
+    
+    figure;
+    imshow(I_45_2);
+    hold on;
+    plot(comp_of_45,'DecimationFactor',[block_size block_size], 'ScaleFactor',2)
+    %quiver(X(:),Y(:),motioni,motionj,10);
+    hold off;
+    title('Optical flow sequence 45')
+    %MSEN
     msen_F1= sqrt((motionj-GT_157(:,:,1)).^2+(motioni-GT_157(:,:,2)).^2);
     msen_F1(~logical(GT_157(:,:,3)))=0;
     
@@ -81,21 +81,21 @@ ind=1;
     msen_F2_LK(~logical(GT_45(:,:,3)))=-200;
     %PEPN
     mmen_157=mean2(msen_F1(msen_F1~=-200));
-   % disp(['MMEN for sequence 157 :' num2str(mmen_157)])
+    disp(['MMEN for sequence 157 :' num2str(mmen_157)])
     mmen_157_LK=mean2(msen_F1_LK(msen_F1_LK~=-200));
-    %disp(['MMEN for sequence 157 LK :'  num2str(mmen_157_LK)])
+  %  disp(['MMEN for sequence 157 LK :'  num2str(mmen_157_LK)])
     mmen_45=mean2(msen_F2(msen_F2~=-200));
-    %disp(['MMEN for sequence 45 :'  num2str(mmen_45)])
+   disp(['MMEN for sequence 45 :'  num2str(mmen_45)])
     mmen_45_LK=mean2(msen_F2_LK(msen_F2_LK~=-200));
-    %disp(['MMEN for sequence 45 LK :'  num2str(mmen_45_LK)])
+   % disp(['MMEN for sequence 45 LK :'  num2str(mmen_45_LK)])
     
     pepn_F1=sum(sum(msen_F1>3))/sum(sum((msen_F1~=-200)));
     pepn_F2=sum(sum(msen_F2>3))/sum(sum((msen_F2~=-200)));
     pepn_F1_LK=sum(sum(msen_F1_LK>3))/sum(sum((msen_F1_LK~=-200)));
     pepn_F2_LK=sum(sum(msen_F2_LK>3))/sum(sum((msen_F2_LK~=-200)));
-    %disp(['PEPN for sequence 157 :'  num2str(pepn_F1)])
+    disp(['PEPN for sequence 157 :'  num2str(pepn_F1)])
     %disp(['PEPN for sequence 157 LK :'  num2str(pepn_F1_LK)])
-    %disp(['PEPN for sequence 45 :'  num2str(pepn_F2)])
+    disp(['PEPN for sequence 45 :'  num2str(pepn_F2)])
     %disp(['PEPN for sequence 45 LK :'  num2str(pepn_F2_LK)])
     mmen_45_vec(ind2,ind)=mmen_45;
     mmen_157_vec(ind2,ind)=mmen_157;
@@ -108,7 +108,7 @@ ind=1;
 end
 
 
-bs=10:10:70;
+bs=8:8:64;
 figure;
 subplot(1,2,1)
 for i=1:5
