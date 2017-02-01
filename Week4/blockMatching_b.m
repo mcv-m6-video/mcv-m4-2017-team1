@@ -10,10 +10,10 @@ currentFrame = double(currentFrame);
 % %% Fast to see algorithm: [40,40], 10
 % %% ~Good performance (not optimal): [20,20] 20
 % Define block size
-blockSize = [40,40];
+blockSize = [20,20];
 % Define the area of search (lenSearch pixels beyond each of the limits of
 % the block)
-lenSearch = 40;
+lenSearch = 20;
 
 %Matrices to store the movement in the i and j direction of each block
 %(motion vectors)
