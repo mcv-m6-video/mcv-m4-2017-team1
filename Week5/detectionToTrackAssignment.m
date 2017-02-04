@@ -1,4 +1,4 @@
-    function [assignments, unassignedTracks, unassignedDetections] = detectionToTrackAssignment(tracks,centroids)
+    function [assignments, unassignedTracks, unassignedDetections] = detectionToTrackAssignment(tracks,centroids,sequence)
 
         nTracks = length(tracks);
         nDetections = size(centroids, 1);
@@ -10,7 +10,13 @@
         end
 
         % Solve the assignment problem.
-        costOfNonAssignment = 50;
+
+        if sequence==1
+            costOfNonAssignment = 12.25;
+        else
+            costOfNonAssignment = 12.2065;
+        end
+        
         [assignments, unassignedTracks, unassignedDetections] = ...
             assignDetectionsToTracks(cost, costOfNonAssignment);
     end

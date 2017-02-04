@@ -1,4 +1,4 @@
-function displayTrackingResults(frame,mask,tracks)
+function displayTrackingResults(frame,mask,tracks,velocity)
 % Convert the frame and the mask to uint8 RGB.
 frame = im2uint8(frame);
 mask = uint8(repmat(mask, [1, 1, 3])) .* 255;
@@ -26,11 +26,22 @@ if ~isempty(tracks)
         % which we display the predicted rather than the actual
         % location.
         labels = cellstr(int2str(ids'));
+        velocity1=cell2mat(velocity);
         predictedTrackInds = ...
             [reliableTracks(:).consecutiveInvisibleCount] > 0;
         isPredicted = cell(size(labels));
         isPredicted(predictedTrackInds) = {' predicted'};
-        labels = strcat(labels, isPredicted);
+        labelsextra=cell(size(labels));
+        for k=1:length(ids)
+            labelsextra(k)= { ' velocity= '};
+        end
+        
+        if isempty(velocity)
+            labels = strcat(labels, isPredicted);
+        else
+            vel=cellstr(int2str(velocity1(ids)'));
+            labels = strcat(labels, labelsextra ,vel, isPredicted);
+        end
         
         % Draw the objects on the frame.
         frame = insertObjectAnnotation(frame, 'rectangle', ...
