@@ -32,6 +32,7 @@ if ~isempty(tracks)
         isPredicted = cell(size(labels));
         isPredicted(predictedTrackInds) = {' predicted'};
         labelsextra=cell(size(labels));
+        color=[];
         for k=1:length(ids)
             labelsextra(k)= { ' velocity= '};
         end
@@ -41,15 +42,20 @@ if ~isempty(tracks)
         else
             vel=cellstr(int2str(velocity1(ids)'));
             labels = strcat(labels, labelsextra ,vel, isPredicted);
+            if velocity1(ids)>100
+                color=[color,'red'];
+            else
+                color=[color, 'yellow'];
+            end
         end
         
         % Draw the objects on the frame.
         frame = insertObjectAnnotation(frame, 'rectangle', ...
-            bboxes, labels);
-        
-        % Draw the objects on the mask.
+            bboxes, labels,'Color',color);
+         % Draw the objects on the mask.
         mask = insertObjectAnnotation(mask, 'rectangle', ...
-            bboxes, labels);
+            bboxes, labels,'Color',color);
+
     end
 end
 

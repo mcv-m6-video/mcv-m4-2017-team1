@@ -7,8 +7,8 @@ clear all
 video=0;
 tic
 %Paths to the input images and their groundtruth
-sequencePath = {'../Archivos/highway/input/' '../Archivos/traffic/traffic/input/'} ;
-groundtruthPath = {'../Archivos/highway/groundtruth/' '../Archivos/traffic/traffic/groundtruth/'};
+sequencePath = {'datasets/highway/input/' 'datasets/traffic/input/'} ;
+groundtruthPath = {'datasets/highway/groundtruth/' 'datasets/traffic/groundtruth/'};
 %Initial and final frame of the sequence
 iniFrame = [1050 950];
 endFrame = [1350 1050];
@@ -16,7 +16,7 @@ predict_sp_seq1=[];
 predict_sp_seq2=[];
 max_pixel_distance=[240, 308];
 distance=[90, 50];
-for seq=1
+for seq=1:2
     disp(['Sequence ' num2str(seq)])
     
     % Create System objects used for detecting moving objects
@@ -28,6 +28,7 @@ for seq=1
     tracks = initializeTracks(); % Create an empty array of tracks.
     
     nextId = 1; % ID of the next track
+    num_cars=0;
     
     %Train the background model with the first half of the sequence
     [means, deviations] = trainBackgroundModelAllPix(char(sequencePath(seq)), char(groundtruthPath(seq)), iniFrame(seq), (endFrame(seq)-iniFrame(seq))/2);
@@ -40,7 +41,8 @@ for seq=1
     
     
     %Chose type of SE
-    SE = strel('line',20,30);  %len es llargada i deg els graus
+    %SE = strel('line',20,30);  %len es llargada i deg els graus
+    SE = strel('disk',10);
     conn=4; %connectivity
     if seq==1
         al=2;
@@ -65,7 +67,6 @@ for seq=1
         image = imread(strcat(char(sequencePath(seq)),FilesInput(i).name));
         imagenext= imread(strcat(char(sequencePath(seq)),FilesInput(i+1).name));
         grayscale = double(rgb2gray(image));
-        i
         %Read the groundtruth image
         %groundtruth = readGroundtruth(char(strcat(groundtruthPath(seq),FilesGroundtruth(i).name)));
         %%%%% --> better results if we count the hard shadows as foreground
@@ -89,19 +90,26 @@ for seq=1
         tracks=updateUnassignedTracks(tracks,unassignedTracks);
         tracks=deleteLostTracks(tracks);
         [nextId,tracks]=createNewTracks(tracks,unassignedDetections,centroids,bboxes,nextId);
-        size(tracks)        
             
         for o=1:length(tracks)
             if identification(tracks(o).id)==0
-                centroidsVel{tracks(o).id}(k,:)=tracks(o).bbox;
+                centroidsVel{tracks(o).id}(k,:)=[tracks(o).bbox(1)+(tracks(o).bbox(3)/2),tracks(o).bbox(2)+(tracks(o).bbox(4)/2)];
                 identification(tracks(o).id)=1;
             else
-                centroidsVel{tracks(o).id}=vertcat(centroidsVel{tracks(o).id}, tracks(o).bbox);
+                centroidsVel{tracks(o).id}=vertcat(centroidsVel{tracks(o).id}, [tracks(o).bbox(1)+(tracks(o).bbox(3)/2),tracks(o).bbox(2)+(tracks(o).bbox(4)/2)]);
             end
-            
+            time=6/30;
+            pixel_meter=4.2/10;
+            to_km=3.6;
             if length(centroidsVel{tracks(o).id})>5
                 displacement=sqrt(double((centroidsVel{tracks(o).id}(counter(tracks(o).id),1)- centroidsVel{tracks(o).id}(counter(tracks(o).id)+5,1))^2 + (centroidsVel{tracks(o).id}(counter(tracks(o).id),2)- centroidsVel{tracks(o).id}(counter(tracks(o).id)+5,2))^2)) ;
-                velocity{tracks(o).id}= (((displacement*4.2)/10)/0.2)*3.6;
+                velocity{tracks(o).id}= ((displacement*pixel_meter)/time)*to_km;
+                
+                %Consider a valid car when we have to calculate velocity
+                if  counter(tracks(o).id)==1
+                    num_cars=num_cars+1;
+                end
+                    
                 counter(tracks(o).id)=counter(tracks(o).id)+1;
             else
                 
@@ -154,20 +162,21 @@ for seq=1
     end
 end
 
+disp(['Total number of cars in the road: ' int2str(num_cars)])
 %Predict speeds
 
-s1=size(predict_sp_seq1);
-fps=20;
-for i=1:s1(1)
-    v=find(predict_sp_seq1(i,:,1)~=0);
-    trajectory=[predict_sp_seq1(i,v(end),1)-predict_sp_seq1(i,v(1),1),predict_sp_seq1(i,v(end),2)-predict_sp_seq1(i,v(1),2)]
-    final_speed_seq1(i)=norm(trajectory)/((v(end)-v(1))/fps);
-end
-
-s2=size(predict_sp_seq2);
-fps=20;
-for i=1:s2(1)
-    v=find(predict_sp_seq2(i,:,1)~=0);
-    trajectory=[predict_sp_seq2(i,v(end),1)-predict_sp_seq2(i,v(1),1),predict_sp_seq2(i,v(1),2)-predict_sp_seq2(i,v(1),2)];
-    final_speed_seq2(i)=norm(trajectory)/((v(end)-v(1))/fps);
-end
+% s1=size(predict_sp_seq1);
+% fps=20;
+% for i=1:s1(1)
+%     v=find(predict_sp_seq1(i,:,1)~=0);
+%     trajectory=[predict_sp_seq1(i,v(end),1)-predict_sp_seq1(i,v(1),1),predict_sp_seq1(i,v(end),2)-predict_sp_seq1(i,v(1),2)]
+%     final_speed_seq1(i)=norm(trajectory)/((v(end)-v(1))/fps);
+% end
+% 
+% s2=size(predict_sp_seq2);
+% fps=20;
+% for i=1:s2(1)
+%     v=find(predict_sp_seq2(i,:,1)~=0);
+%     trajectory=[predict_sp_seq2(i,v(end),1)-predict_sp_seq2(i,v(1),1),predict_sp_seq2(i,v(1),2)-predict_sp_seq2(i,v(1),2)];
+%     final_speed_seq2(i)=norm(trajectory)/((v(end)-v(1))/fps);
+% end
