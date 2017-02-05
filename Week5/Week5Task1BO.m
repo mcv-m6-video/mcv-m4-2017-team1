@@ -12,10 +12,6 @@ groundtruthPath = {'datasets/highway/groundtruth/' 'datasets/traffic/groundtruth
 %Initial and final frame of the sequence
 iniFrame = [1050 950];
 endFrame = [1350 1050];
-predict_sp_seq1=[];
-predict_sp_seq2=[];
-max_pixel_distance=[240, 308];
-distance=[90, 50];
 for seq=1:2
     disp(['Sequence ' num2str(seq)])
     

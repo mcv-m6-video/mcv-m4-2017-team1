@@ -16,7 +16,7 @@ sequencePath = {'datasets/ronda/01_twolanes/'} ;
 
 %Initial and final frame of the sequence
 iniFrame = [330];
-endFrame = [530];
+endFrame = [1030];
 
 % Create System objects used for detecting moving objects
 blobAnalyzer = vision.BlobAnalysis('BoundingBoxOutputPort', true, ...
@@ -26,7 +26,7 @@ blobAnalyzer = vision.BlobAnalysis('BoundingBoxOutputPort', true, ...
 tracks = initializeTracks(); % Create an empty array of tracks.
 
 nextId = 1; % ID of the next track
-
+num_cars=0;
 
 framesPassed = 0;
 for seq=1
@@ -60,15 +60,21 @@ for seq=1
     means=na_means;
     k=k+1;
     
+     identification=zeros(1,100);
+    counter=ones(1,100);
+    velocity=cell(1,100);
+    for r=1:100
+        velocity{r}=0;
+    end
     
     %Detect foreground objects in the second half of the sequence
     for i = iniFrame(seq)+25:endFrame(seq)
         %Read an image and convert it to grayscale
         image = imread(strcat(char(sequencePath(seq)),FilesInput(i).name));
         imagenext= imread(strcat(char(sequencePath(seq)),FilesInput(i+1).name));
-        imagenext = imresize(imagenext,0.5);
+        imagenext = imresize(imagenext,0.25);
         grayscale = double(rgb2gray(image));
-        grayscale = imresize(grayscale,0.5);
+        grayscale = imresize(grayscale,0.25);
         
         old_means=means;
         old_deviations=deviations;
@@ -88,15 +94,17 @@ for seq=1
         
         detection = imfill(detection, 'holes');
         detection = bwareaopen(detection,20);
-        SE = strel('line',4,0);
+        SE = strel('disk',5);
+        
+        detection=imclose(detection,SE);
         detection=imopen(detection,SE);
         detection = medfilt2(detection,[15,15]);
         
         %detection = bwareaopen(detection,100);
-        detection(700:960,:)=0;
-        imagenext(700:705,:,1) = 255;
-        imagenext(700:705,:,2) = 0;
-        imagenext(700:705,:,3) = 0;
+        detection(700/2:960/2,:)=0;
+        imagenext(700/2:704/2,:,1) = 255;
+        imagenext(700/2:704/2,:,2) = 0;
+        imagenext(700/2:704/2,:,3) = 0;
         
         %Kalman Filter
         [area,centroids, bboxes] = step(blobAnalyzer,detection);
@@ -108,11 +116,65 @@ for seq=1
         tracks=updateUnassignedTracks(tracks,unassignedTracks);
         tracks=deleteLostTracks(tracks);
         [nextId,tracks]=createNewTracks(tracks,unassignedDetections,centroids,bboxes,nextId);
+        
+        %%%
         if framesPassed == 0
             previousTracks = tracks;
         end
+        %%%
         
-        
+          for o=1:length(tracks)
+            if identification(tracks(o).id)==0
+                centroidsVel{tracks(o).id}(k,:)=[tracks(o).bbox(1)+(tracks(o).bbox(3)/2),tracks(o).bbox(2)+(tracks(o).bbox(4)/2)];
+                identification(tracks(o).id)=1;
+            else
+                centroidsVel{tracks(o).id}=vertcat(centroidsVel{tracks(o).id}, [tracks(o).bbox(1)+(tracks(o).bbox(3)/2),tracks(o).bbox(2)+(tracks(o).bbox(4)/2)]);
+            end
+            time=6/30;
+            pixel_meter=4.2/10;
+            to_km=3.6;
+            if length(centroidsVel{tracks(o).id})>5
+                ref=centroidsVel{tracks(o).id}(counter(tracks(o).id),1);
+%                 %% 225 -> 245   | 20 pixels = 8m
+%                 %% 245 -> 275   | 30 pixels = 8m
+%                 %% 275 -> 315   | 40 pixels = 8m
+%                 %% 315 -> 375   | 60 pixels = 8m
+%                 %% 375 -> 465   | 90 pixels = 8m
+%                 %% 465 -> 700   | 235 pixels = 8m
+
+                if ref < 700/2 && ref > 465/2
+                    pixel_meter=8.5/235.0;
+                    
+                elseif ref < 465/2 && ref > 375/2
+                    pixel_meter=8.5/90.0;
+                   
+                elseif ref < 375/2 && ref > 315/2
+                    pixel_meter=8.5/60.0;
+                    
+                elseif ref < 315/2 && ref > 275/2
+                    pixel_meter=8.5/40.0;
+                   
+                elseif ref < 275/2 && ref > 245/2
+                    pixel_meter=8.5/30.0;
+                   
+                elseif ref < 245/2 && ref > 225/2
+                    pixel_meter=8.5/20.0;
+                   
+                end
+                displacement=sqrt(double((centroidsVel{tracks(o).id}(counter(tracks(o).id),1)- centroidsVel{tracks(o).id}(counter(tracks(o).id)+5,1))^2 + (centroidsVel{tracks(o).id}(counter(tracks(o).id),2)- centroidsVel{tracks(o).id}(counter(tracks(o).id)+5,2))^2)) ;
+                velocity{tracks(o).id}= ((displacement*pixel_meter)/time)*to_km;
+                
+                %Consider a valid car when we have to calculate velocity
+                if  counter(tracks(o).id)==1
+                    num_cars=num_cars+1;
+                end
+                    
+                counter(tracks(o).id)=counter(tracks(o).id)+1;
+            else
+                
+            end
+        end
+
         
         
         %displayTrackingResults(imagenext,detection,tracks);
@@ -132,63 +194,63 @@ for seq=1
         imagenext(315:317,:,2) = 0;
         imagenext(315:317,:,3) = 0;
         
+%         
+%         if framesPassed == 1
+%             framesPassed = 0;
+%             ids = [tracks.id];
+%             for i = 1:size(ids,2)
+%                 t1 = previousTracks([previousTracks.id]==ids(i));
+%                 if isempty(t1)
+%                     continue;
+%                 end
+%                 t2 = tracks(i);
+%                 pixelsMoved = t1.bbox(2)- t2.bbox(2);
+%                 %% 225 -> 245   | 20 pixels = 8m
+%                 %% 245 -> 275   | 30 pixels = 8m
+%                 %% 275 -> 315   | 40 pixels = 8m
+%                 %% 315 -> 375   | 60 pixels = 8m
+%                 %% 375 -> 465   | 90 pixels = 8m
+%                 %% 465 -> 700   | 235 pixels = 8m
+% 
+%                 %80/108 meters max in 1 frame
+%                 if t1.bbox(2) < 700 && t1.bbox(2) > 465
+%                     velocity = double(pixelsMoved) * (8.5/235.0) / (3.0/30.0) * 3.6
+%                     if pixelsMoved > (80/108) * (235/8)
+%                         display('VELOCITY LIMIT!')
+%                     end
+%                 elseif t1.bbox(2) < 465 && t1.bbox(2) > 375
+%                     velocity = double(pixelsMoved)  * (8.5/90.0) / (3.0/30.0) * 3.6
+%                     if pixelsMoved > (80/108) * (90/8)
+%                         display('VELOCITY LIMIT!')
+%                     end
+%                 elseif t1.bbox(2) < 375 && t1.bbox(2) > 315
+%                     velocity = double(pixelsMoved)  * (8.5/60.0) / (3.0/30.0) * 3.6
+%                     if pixelsMoved > (80/108) * (60/8)
+%                         display('VELOCITY LIMIT!')
+%                     end
+%                 elseif t1.bbox(2) < 315 && t1.bbox(2) > 275
+%                     velocity = double(pixelsMoved)  * (8.5/40.0) / (3.0/30.0) * 3.6
+%                     if pixelsMoved > (80/108) * (40/8)
+%                         display('VELOCITY LIMIT!')
+%                     end
+%                 elseif t1.bbox(2) < 275 && t1.bbox(2) > 245
+%                     velocity = double(pixelsMoved)  * (8.5/30.0) / (3.0/30.0) * 3.6
+%                     if pixelsMoved > (80/108) * (30/8)
+%                         display('VELOCITY LIMIT!')
+%                     end
+%                 elseif t1.bbox(2) < 245 && t1.bbox(2) > 225
+%                     velocity = double(pixelsMoved)  * (8.5/20.0) / (3.0/30.0) * 3.6
+%                     if pixelsMoved > (80/108) * (20/8)
+%                         display('VELOCITY LIMIT!')
+%                     end
+%                 end
+%             end
+%             previousTracks = tracks;
+%         else
+%             framesPassed = framesPassed+1;
+%         end
         
-        if framesPassed == 1
-            framesPassed = 0;
-            ids = [tracks.id];
-            for i = 1:size(ids,2)
-                t1 = previousTracks([previousTracks.id]==ids(i));
-                if isempty(t1)
-                    continue;
-                end
-                t2 = tracks(i);
-                pixelsMoved = t1.bbox(2)- t2.bbox(2);
-                %% 225 -> 245   | 20 pixels = 8m
-                %% 245 -> 275   | 30 pixels = 8m
-                %% 275 -> 315   | 40 pixels = 8m
-                %% 315 -> 375   | 60 pixels = 8m
-                %% 375 -> 465   | 90 pixels = 8m
-                %% 465 -> 700   | 235 pixels = 8m
-
-                %80/108 meters max in 1 frame
-                if t1.bbox(2) < 700 && t1.bbox(2) > 465
-                    velocity = double(pixelsMoved) * (8.5/235.0) / (3.0/30.0) * 3.6
-                    if pixelsMoved > (80/108) * (235/8)
-                        display('VELOCITY LIMIT!')
-                    end
-                elseif t1.bbox(2) < 465 && t1.bbox(2) > 375
-                    velocity = double(pixelsMoved)  * (8.5/90.0) / (3.0/30.0) * 3.6
-                    if pixelsMoved > (80/108) * (90/8)
-                        display('VELOCITY LIMIT!')
-                    end
-                elseif t1.bbox(2) < 375 && t1.bbox(2) > 315
-                    velocity = double(pixelsMoved)  * (8.5/60.0) / (3.0/30.0) * 3.6
-                    if pixelsMoved > (80/108) * (60/8)
-                        display('VELOCITY LIMIT!')
-                    end
-                elseif t1.bbox(2) < 315 && t1.bbox(2) > 275
-                    velocity = double(pixelsMoved)  * (8.5/40.0) / (3.0/30.0) * 3.6
-                    if pixelsMoved > (80/108) * (40/8)
-                        display('VELOCITY LIMIT!')
-                    end
-                elseif t1.bbox(2) < 275 && t1.bbox(2) > 245
-                    velocity = double(pixelsMoved)  * (8.5/30.0) / (3.0/30.0) * 3.6
-                    if pixelsMoved > (80/108) * (30/8)
-                        display('VELOCITY LIMIT!')
-                    end
-                elseif t1.bbox(2) < 245 && t1.bbox(2) > 225
-                    velocity = double(pixelsMoved)  * (8.5/20.0) / (3.0/30.0) * 3.6
-                    if pixelsMoved > (80/108) * (20/8)
-                        display('VELOCITY LIMIT!')
-                    end
-                end
-            end
-            previousTracks = tracks;
-        else
-            framesPassed = framesPassed+1;
-        end
-        
-        displayTrackingResults(imagenext,detection,tracks,{});
+        displayTrackingResults(imagenext,detection,tracks,velocity);
         
         %Show the output of the detector
         %figure(2)
@@ -197,4 +259,6 @@ for seq=1
     end
     
 end
+
+disp(['Total number of cars in the road: ' int2str(num_cars)])
 toc
