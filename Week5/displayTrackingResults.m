@@ -34,15 +34,16 @@ if ~isempty(tracks)
         labelsextra=cell(size(labels));
         color={};
         for k=1:length(ids)
-            labelsextra(k)= { ' velocity= '};
+            labelsextra(k)= { ' speed= '};
         end
         
         if isempty(velocity)
             labels = strcat(labels, isPredicted);
+            
         else
             vel=cellstr(int2str(velocity1(ids)'));
             labels = strcat(labels, labelsextra ,vel, isPredicted);
-             v=velocity1(ids)
+             v=velocity1(ids);
             for k=1:length(v)
            
             if v(k)>100
@@ -59,16 +60,44 @@ if ~isempty(tracks)
                 end
             end
             end
-            color
         end
         
+        %Eliminate predicted velocities and bounding boxes
+        disp('new iteration')
+        
+bb_s=size(bboxes);
+lab_size=size(labels);
+vec_ind=[];
+bboxes_=[];
+labels_={};
+color_={};
+        for ind=1:lab_size(1)
+        k = findstr(labels{ind}, 'predicted')
+        if ~isempty(k)
+            vec_ind=[vec_ind ind];
+        end
+        end
+        new_ind=1;
+        for i=1:bb_s(1)
+            if (sum(i==vec_ind)==0)
+                bboxes_(new_ind,:)=bboxes(i,:);
+                labels_{new_ind}=labels{i};
+                color_{new_ind}=color{i};
+                new_ind=new_ind+1;
+            end
+        end
+       % if ~isempty(labels) && numel(labels)>1
+         %labels(cellfun('isempty',labels)) = [];
+       % color(cellfun('isempty',color)) = [];
+        %end
         % Draw the objects on the frame.
+           if ~isempty(bboxes_) && ~isempty(labels_)
         frame = insertObjectAnnotation(frame, 'rectangle', ...
-            bboxes, labels,'Color',color);
+            bboxes_, labels_,'Color',color_);
          % Draw the objects on the mask.
         mask = insertObjectAnnotation(mask, 'rectangle', ...
-            bboxes, labels,'Color',color);
-
+            bboxes_, labels_,'Color',color_);
+        end
     end
 end
 

@@ -9,6 +9,14 @@
 close all
 clear all
 
+
+x1=[77 126; 174 127; 18 309; 480 270];
+x1 = makehomogeneous(x1');
+x2 = [0 0; 270 0; 0 480; 480 270];
+x2 = makehomogeneous(x2');
+% x2 = [0 0 1; 0 1, 1; 1, 1, 1; 1, 0, 1];
+
+H = homography2d(x1, x2);
 video=1;
 tic
 %Paths to the input images and their groundtruth
@@ -102,12 +110,17 @@ for seq=1
         
         %detection = bwareaopen(detection,100);
         detection(700/2:960/2,:)=0;
-        imagenext(700/2:704/2,:,1) = 255;
-        imagenext(700/2:704/2,:,2) = 0;
-        imagenext(700/2:704/2,:,3) = 0;
+       % imagenext(700/2:704/2,:,1) = 255;
+       % imagenext(700/2:704/2,:,2) = 0;
+       % imagenext(700/2:704/2,:,3) = 0;
+       
+        detection_=RemovePerspective(detection,H,[480 270]);
+        imagenext_=RemovePerspective(imagenext,H,[480 270]);
+       
+        detection_=logical(detection_(:,:,1));
         
         %Kalman Filter
-        [area,centroids, bboxes] = step(blobAnalyzer,detection);
+        [area,centroids, bboxes] = step(blobAnalyzer,detection_);
         tracks=predictNewLocationsOfTracks(tracks);
         [assignments, unassignedTracks, unassignedDetections] = ...
             detectionToTrackAssignment(tracks,centroids,1);
@@ -141,26 +154,27 @@ for seq=1
 %                 %% 315 -> 375   | 60 pixels = 8m
 %                 %% 375 -> 465   | 90 pixels = 8m
 %                 %% 465 -> 700   | 235 pixels = 8m
-
-                if ref < 700/2 && ref > 465/2
-                    pixel_meter=8.5/235.0;
-                    
-                elseif ref < 465/2 && ref > 375/2
-                    pixel_meter=8.5/90.0;
-                   
-                elseif ref < 375/2 && ref > 315/2
-                    pixel_meter=8.5/60.0;
-                    
-                elseif ref < 315/2 && ref > 275/2
-                    pixel_meter=8.5/40.0;
-                   
-                elseif ref < 275/2 && ref > 245/2
-                    pixel_meter=8.5/30.0;
-                   
-                elseif ref < 245/2 && ref > 225/2
-                    pixel_meter=8.5/20.0;
-                   
-                end
+% 
+%                 if ref < 700/2 && ref > 465/2
+%                     pixel_meter=8.5/235.0;
+%                     
+%                 elseif ref < 465/2 && ref > 375/2
+%                     pixel_meter=8.5/90.0;
+%                    
+%                 elseif ref < 375/2 && ref > 315/2
+%                     pixel_meter=8.5/60.0;
+%                     
+%                 elseif ref < 315/2 && ref > 275/2
+%                     pixel_meter=8.5/40.0;
+%                    
+%                 elseif ref < 275/2 && ref > 245/2
+%                     pixel_meter=8.5/30.0;
+%                    
+%                 elseif ref < 245/2 && ref > 225/2
+%                     pixel_meter=8.5/20.0;
+%                    
+%                 end
+pixel_meter=8.5/60;
                 displacement=sqrt(double((centroidsVel{tracks(o).id}(counter(tracks(o).id),1)- centroidsVel{tracks(o).id}(counter(tracks(o).id)+5,1))^2 + (centroidsVel{tracks(o).id}(counter(tracks(o).id),2)- centroidsVel{tracks(o).id}(counter(tracks(o).id)+5,2))^2)) ;
                 velocity{tracks(o).id}= ((displacement*pixel_meter)/time)*to_km;
                 
@@ -250,7 +264,7 @@ for seq=1
 %             framesPassed = framesPassed+1;
 %         end
         
-        displayTrackingResults(imagenext,detection,tracks,velocity);
+        displayTrackingResults(imagenext_,detection_,tracks,velocity);
         
         %Show the output of the detector
         %figure(2)
