@@ -1,4 +1,4 @@
-function [newMean, newDev] = trainBackgroundModelAllPix(sequencePath,groundtruthPath, iniFrame, numFrames)
+function [newMean, newDev] = trainBackgroundModel_final(sequencePath, iniFrame, numFrames)
 
 %Get the information of the input and groundtruth images
 FilesInput = dir(strcat(sequencePath, '*jpg'));
@@ -7,6 +7,7 @@ FilesInput = dir(strcat(sequencePath, '*jpg'));
 %Read the first image and convert it to grayscale
 image = imread(strcat(sequencePath,FilesInput(iniFrame).name));
 grayscale = double(rgb2gray(image));
+grayscale = imresize(grayscale,0.5);
 %Create a mask of the pixels to take into account in the computation of the
 %mean and deviation (those that belong to the background, with a value of 0)
 %mask = double(imread(strcat(groundtruthPath,FilesGroundtruth(iniFrame).name)))==0;
@@ -31,6 +32,8 @@ for i = iniFrame+1:iniFrame+numFrames
     %Read an image and convert it to grayscale
     image = imread(strcat(sequencePath,FilesInput(i).name));
     grayscale = double(rgb2gray(image));
+    grayscale = imresize(grayscale,0.5);
+
     %Create a mask of the pixels to take into account in the computation of the
     %mean and deviation
     %mask = double(imread(strcat(groundtruthPath,FilesGroundtruth(i).name)))==0;
@@ -49,16 +52,5 @@ for i = iniFrame+1:iniFrame+numFrames
     oldMean = newMean;
     oldDev = newDev;
 
-    %Plot the evolution of the gray value, mean and deviation of a pixel
-    pixelGray = [pixelGray grayscale(pixel(1),pixel(2))]; 
-    pixelMean = [pixelMean newMean(pixel(1),pixel(2))];
-    pixelDev = [pixelDev newDev(pixel(1),pixel(2))];
-
-    plot(1:i-iniFrame,pixelMean)
-    hold on;
-    plot(1:i-iniFrame,pixelGray)
-    plot(1:i-iniFrame,pixelDev)
-    hold off;
-    drawnow();
 end
 
