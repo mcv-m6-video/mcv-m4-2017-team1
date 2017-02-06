@@ -1,4 +1,4 @@
-function displayTrackingResults(frame,mask,tracks,velocity)
+function [speed_limit_pictures,speed_limit_id,speed_limit_labels]=displayTrackingResults(frame,mask,tracks,velocity,speed_limit_pictures,speed_limit_id,speed_limit_labels)
 % Convert the frame and the mask to uint8 RGB.
 frame = im2uint8(frame);
 mask = uint8(repmat(mask, [1, 1, 3])) .* 255;
@@ -49,7 +49,7 @@ if ~isempty(tracks)
                 if v(k)>100
                     if isempty(color)
                         color{1}='red';
-                    else
+                     else
                         color{end+1}='red';
                     end
                 else
@@ -98,6 +98,7 @@ if ~isempty(tracks)
             mask = insertObjectAnnotation(mask, 'rectangle', ...
                 bboxes_, labels_,'Color',color_);
             
+            %% Density control
             if numel(labels)>=4
                 color_density='red';
                 text_density='High density';
@@ -113,9 +114,27 @@ if ~isempty(tracks)
                 color_density,'BoxOpacity',0.4,'TextColor','white');
             frame = insertText(frame,[0 0],text_density,'FontSize',18,'BoxColor',...
                 color_density,'BoxOpacity',0.4,'TextColor','white');
+            %% Save image of cars which surpassed speed limit
             
+            for i=1:numel(labels_)
+                if strcmp(color_{i},'red')
+                    if sum(str2num(labels_{i}(1))==speed_limit_id)==0
+                    aux=bboxes_(i,:);
+                    speed_limit_pictures=[speed_limit_pictures frame(aux(1):aux(1)+aux(3),aux(2):aux(2)+aux(4))];
+                    speed_limit_labels=[speed_limit_labels labels_{i}];
+                    speed_limit_id=[speed_limit_id str2num(labels_{i}(1))];
+                end
+            end
+            
+            end
+        else
+               mask = insertText(mask,[0 0],'Low density','FontSize',18,'BoxColor',...
+                'green','BoxOpacity',0.4,'TextColor','white');
+             frame = insertText(frame,[0 0],'Low density','FontSize',18,'BoxColor',...
+                'green','BoxOpacity',0.4,'TextColor','white');
+         
         end
-    end
+
 end
 
 % Display the mask and the frame.
