@@ -45,8 +45,8 @@ if ~isempty(tracks)
             labels = strcat(labels, labelsextra ,vel, isPredicted);
             v=velocity1(ids);
             for k=1:length(v)
-                
-                if v(k)>100
+
+                if v(k)>80
                     if isempty(color)
                         color{1}='red';
                     else
