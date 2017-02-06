@@ -122,11 +122,11 @@ if ~isempty(tracks)
                         i
                         labels_
                         bboxes_
-                    aux=bboxes_(i,:);
+                 %   aux=bboxes_(i,:);
                     %speed_limit_pictures={speed_limit_pictures; frame(aux(1):aux(1)+aux(3),aux(2):aux(2)+aux(4))};
                    % speed_limit_pictures(end+1)={frame(aux(2):aux(2)+aux(4),aux(1):aux(1)+aux(3))};
-                    speed_limit_labels=[speed_limit_labels; labels_{i}];
-                    speed_limit_id=[speed_limit_id; str2num(labels_{i}(1))];
+               %     speed_limit_labels=[speed_limit_labels; labels_{i}];
+                %    speed_limit_id=[speed_limit_id; str2num(labels_{i}(1))];
                 end
             end
             
