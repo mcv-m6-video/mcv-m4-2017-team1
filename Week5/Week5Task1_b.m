@@ -8,9 +8,18 @@
 %% 465 -> 700   | 235
 close all
 clear all
+video=1;
 
+if video==1
+    ind=1;
+%    F(NFrames) = struct('cdata',[],'colormap',[]);
+    v = VideoWriter('RoadTraffic_surv.avi');
+    v.FrameRate = 10;
+    open(v)
+end
+%x1=[77 126; 174 127; 18 309; 480 270];
 
-x1=[77 126; 174 127; 18 309; 480 270];
+x1=[80 126; 161 127; 18 309; 480 270];
 x1 = makehomogeneous(x1');
 x2 = [0 0; 270 0; 0 480; 480 270];
 x2 = makehomogeneous(x2');
@@ -24,7 +33,7 @@ sequencePath = {'datasets/ronda/01_twolanes/'} ;
 
 %Initial and final frame of the sequence
 iniFrame = [330];
-endFrame = [1030];
+endFrame = [530];
 
 % Create System objects used for detecting moving objects
 blobAnalyzer = vision.BlobAnalysis('BoundingBoxOutputPort', true, ...
@@ -35,6 +44,9 @@ tracks = initializeTracks(); % Create an empty array of tracks.
 
 nextId = 1; % ID of the next track
 num_cars=0;
+speed_limit_pictures=[];
+speed_limit_id=[];
+speed_limit_labels=[];
 
 framesPassed = 0;
 for seq=1
@@ -264,7 +276,13 @@ pixel_meter=8.5/60;
 %             framesPassed = framesPassed+1;
 %         end
         
-        displayTrackingResults(imagenext_,detection_,tracks,velocity);
+        [speed_limit_pictures,speed_limit_id,speed_limit_labels]= displayTrackingResults(imagenext_,detection_,tracks,velocity,speed_limit_pictures,speed_limit_id,speed_limit_labels);
+        if video==1
+        F(ind) = getframe(gcf);
+        writeVideo(v,F(ind));
+        ind=ind+1;
+        end
+                        
         
         %Show the output of the detector
         %figure(2)
@@ -272,6 +290,10 @@ pixel_meter=8.5/60;
         
     end
     
+end
+if video==1
+    %Close video object
+    close(v)
 end
 
 disp(['Total number of cars in the road: ' int2str(num_cars)])
