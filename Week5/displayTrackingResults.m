@@ -45,8 +45,8 @@ if ~isempty(tracks)
             labels = strcat(labels, labelsextra ,vel, isPredicted);
             v=velocity1(ids);
             for k=1:length(v)
-                
-                if v(k)>100
+
+                if v(k)>50
                     if isempty(color)
                         color{1}='red';
                      else
@@ -72,7 +72,7 @@ if ~isempty(tracks)
         labels_={};
         color_={};
         for ind=1:lab_size(1)
-            k = findstr(labels{ind}, 'predicted')
+            k = findstr(labels{ind}, 'predicted');
             if ~isempty(k)
                 vec_ind=[vec_ind ind];
             end
@@ -99,13 +99,13 @@ if ~isempty(tracks)
                 bboxes_, labels_,'Color',color_);
             
             %% Density control
-            if numel(labels)>=4
+            if numel(labels_)>=4
                 color_density='red';
                 text_density='High density';
-            elseif numel(labels)>2 && numel(labels)<4
+            elseif numel(labels_)>2 && numel(labels_)<4
                 color_density='yellow';
                 text_density='Moderate density';
-            elseif numel(labels)<=2
+            elseif numel(labels_)<=2
                 color_density='green';
                 text_density='Low density';
             end
@@ -119,10 +119,14 @@ if ~isempty(tracks)
             for i=1:numel(labels_)
                 if strcmp(color_{i},'red')
                     if sum(str2num(labels_{i}(1))==speed_limit_id)==0
+                        i
+                        labels_
+                        bboxes_
                     aux=bboxes_(i,:);
-                    speed_limit_pictures=[speed_limit_pictures frame(aux(1):aux(1)+aux(3),aux(2):aux(2)+aux(4))];
-                    speed_limit_labels=[speed_limit_labels labels_{i}];
-                    speed_limit_id=[speed_limit_id str2num(labels_{i}(1))];
+                    %speed_limit_pictures={speed_limit_pictures; frame(aux(1):aux(1)+aux(3),aux(2):aux(2)+aux(4))};
+                    speed_limit_pictures(end+1)={frame(aux(1):aux(1)+aux(3),aux(2):aux(2)+aux(4))};
+                    speed_limit_labels=[speed_limit_labels; labels_{i}];
+                    speed_limit_id=[speed_limit_id; str2num(labels_{i}(1))];
                 end
             end
             
