@@ -125,19 +125,25 @@ for seq=1
 
         for o=1:length(tracks)
             if identification(tracks(o).id)==0
-                centroidsVel{tracks(o).id}(k,:)=[tracks(o).bbox(1)+(tracks(o).bbox(3)/2),tracks(o).bbox(2)+(tracks(o).bbox(4)/2)];
+                %centroidsVel{tracks(o).id}(k,:)=[tracks(o).bbox(1)+(tracks(o).bbox(3)/2),tracks(o).bbox(2)+(tracks(o).bbox(4)/2)];
+                centroidsVel{tracks(o).id}(k,:)=[tracks(o).bbox(1),tracks(o).bbox(2)];
                 identification(tracks(o).id)=1;
             else
-                centroidsVel{tracks(o).id}=vertcat(centroidsVel{tracks(o).id}, [tracks(o).bbox(1)+(tracks(o).bbox(3)/2),tracks(o).bbox(2)+(tracks(o).bbox(4)/2)]);
+                %centroidsVel{tracks(o).id}=vertcat(centroidsVel{tracks(o).id}, [tracks(o).bbox(1)+(tracks(o).bbox(3)/2),tracks(o).bbox(2)+(tracks(o).bbox(4)/2)]);
+                centroidsVel{tracks(o).id}=vertcat(centroidsVel{tracks(o).id}, [tracks(o).bbox(1),tracks(o).bbox(2)]);
+
             end
-            time=10/30;
-            pixel_meter=4.2/10;
+            
+            %pixel_meter=4.2/10;
+            pixel_meter=9/75;
+            %pixel_meter=3/46.5;
             to_km=3.6;
-            if length(centroidsVel{tracks(o).id})>9
+            wait_frames = 3;
+            time=wait_frames/30;
+            if length(centroidsVel{tracks(o).id})>wait_frames-1
                 ref=centroidsVel{tracks(o).id}(counter(tracks(o).id),1);
-                
-                pixel_meter=9/75;
-                displacement=sqrt(double((centroidsVel{tracks(o).id}(counter(tracks(o).id),1)- centroidsVel{tracks(o).id}(counter(tracks(o).id)+5,1))^2 + (centroidsVel{tracks(o).id}(counter(tracks(o).id),2)- centroidsVel{tracks(o).id}(counter(tracks(o).id)+5,2))^2)) ;
+             
+                displacement=sqrt(double((centroidsVel{tracks(o).id}(counter(tracks(o).id),1)- centroidsVel{tracks(o).id}(counter(tracks(o).id)+wait_frames-1,1))^2 + (centroidsVel{tracks(o).id}(counter(tracks(o).id),2)- centroidsVel{tracks(o).id}(counter(tracks(o).id)+wait_frames-1,2))^2)) ;
                 velocity{tracks(o).id}= ((displacement*pixel_meter)/time)*to_km;
                 
                 %Consider a valid car when we have to calculate velocity
