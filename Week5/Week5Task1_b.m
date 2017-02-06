@@ -83,10 +83,11 @@ for seq=1
     for i = iniFrame(seq)+25:endFrame(seq)
         %Read an image and convert it to grayscale
         image = imread(strcat(char(sequencePath(seq)),FilesInput(i).name));
+        image = imresize(image,0.25);
         imagenext= imread(strcat(char(sequencePath(seq)),FilesInput(i+1).name));
         imagenext = imresize(imagenext,0.25);
         grayscale = double(rgb2gray(image));
-        grayscale = imresize(grayscale,0.25);
+        %grayscale = imresize(grayscale,0.25);
         
         old_means=means;
         old_deviations=deviations;
@@ -106,7 +107,7 @@ for seq=1
 
         detection_=RemovePerspective(detection,H,[480 270]);
 
-        imagenext_=RemovePerspective(imagenext,H,[480 270]);
+        image_=RemovePerspective(image,H,[480 270]);
  
         detection_=logical(detection_(:,:,1));
         
@@ -157,32 +158,13 @@ for seq=1
             end
         end
         
-        
-        %displayTrackingResults(imagenext,detection,tracks);
-        imagenext(465:467,:,1) = 255;
-        imagenext(465:467,:,2) = 0;
-        imagenext(465:467,:,3) = 0;
-        
-        imagenext(375:377,:,1) = 255;
-        imagenext(375:377,:,2) = 0;
-        imagenext(375:377,:,3) = 0;
-        
-        imagenext(315:317,:,1) = 255;
-        imagenext(315:317,:,2) = 0;
-        imagenext(315:317,:,3) = 0;
-        
-        imagenext(315:317,:,1) = 255;
-        imagenext(315:317,:,2) = 0;
-        imagenext(315:317,:,3) = 0;
-        
-
-        
-        [speed_limit_pictures,speed_limit_id,speed_limit_labels]= displayTrackingResults(imagenext_,detection_,tracks,velocity,speed_limit_pictures,speed_limit_id,speed_limit_labels);
+          [speed_limit_pictures,speed_limit_id,speed_limit_labels]= displayTrackingResults(image_,detection_,tracks,velocity,speed_limit_pictures,speed_limit_id,speed_limit_labels);
         if video==1
         F(ind) = getframe(gcf);
         writeVideo(v,F(ind));
         ind=ind+1;
         end
+        
 
         
         %Show the output of the detector

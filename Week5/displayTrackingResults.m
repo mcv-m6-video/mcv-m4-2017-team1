@@ -46,7 +46,7 @@ if ~isempty(tracks)
             v=velocity1(ids);
             for k=1:length(v)
 
-                if v(k)>50
+                if v(k)>80
                     if isempty(color)
                         color{1}='red';
                      else
@@ -124,7 +124,7 @@ if ~isempty(tracks)
                         bboxes_
                     aux=bboxes_(i,:);
                     %speed_limit_pictures={speed_limit_pictures; frame(aux(1):aux(1)+aux(3),aux(2):aux(2)+aux(4))};
-                    speed_limit_pictures(end+1)={frame(aux(2):aux(2)+aux(4),aux(1):aux(1)+aux(3))};
+                   % speed_limit_pictures(end+1)={frame(aux(2):aux(2)+aux(4),aux(1):aux(1)+aux(3))};
                     speed_limit_labels=[speed_limit_labels; labels_{i}];
                     speed_limit_id=[speed_limit_id; str2num(labels_{i}(1))];
                 end
