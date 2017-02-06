@@ -1,6 +1,6 @@
 close all
 clear all
-video=1;
+video=0;
 
 if video==1
     ind=1;
@@ -18,7 +18,7 @@ x2 = makehomogeneous(x2');
 % x2 = [0 0 1; 0 1, 1; 1, 1, 1; 1, 0, 1];
 
 H = homography2d(x1, x2);
-video=1;
+
 tic
 %Paths to the input images and their groundtruth
 sequencePath = {'datasets/ronda/01_twolanes/'} ;
@@ -136,11 +136,11 @@ for seq=1
             end
             
             %pixel_meter=4.2/10;
-            pixel_meter=9/75;
+            pixel_meter=9.0/78.0;
             %pixel_meter=3/46.5;
             to_km=3.6;
-            wait_frames = 3;
-            time=wait_frames/30;
+            wait_frames = 3.0;
+            time=wait_frames/30.0;
             if length(centroidsVel{tracks(o).id})>wait_frames-1
                 ref=centroidsVel{tracks(o).id}(counter(tracks(o).id),1);
              
@@ -160,9 +160,9 @@ for seq=1
         
           [speed_limit_pictures,speed_limit_id,speed_limit_labels]= displayTrackingResults(image_,detection_,tracks,velocity,speed_limit_pictures,speed_limit_id,speed_limit_labels);
         if video==1
-        F(ind) = getframe(gcf);
-        writeVideo(v,F(ind));
-        ind=ind+1;
+            F(ind) = getframe(gcf);
+            writeVideo(v,F(ind));
+            ind=ind+1;
         end
         
 
