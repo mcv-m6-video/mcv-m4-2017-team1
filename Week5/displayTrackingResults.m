@@ -43,39 +43,39 @@ if ~isempty(tracks)
         else
             vel=cellstr(int2str(velocity1(ids)'));
             labels = strcat(labels, labelsextra ,vel, isPredicted);
-             v=velocity1(ids);
+            v=velocity1(ids);
             for k=1:length(v)
-           
-            if v(k)>100
-                if isempty(color)
-                    color{1}='red';
+                
+                if v(k)>100
+                    if isempty(color)
+                        color{1}='red';
+                    else
+                        color{end+1}='red';
+                    end
                 else
-                color{end+1}='red';
+                    if isempty(color)
+                        color{1}='yellow';
+                    else
+                        color{end+1}='yellow';
+                    end
                 end
-            else
-                if isempty(color)
-                    color{1}='yellow';
-                else
-                color{end+1}='yellow';
-                end
-            end
             end
         end
         
         %Eliminate predicted velocities and bounding boxes
         disp('new iteration')
         
-bb_s=size(bboxes);
-lab_size=size(labels);
-vec_ind=[];
-bboxes_=[];
-labels_={};
-color_={};
+        bb_s=size(bboxes);
+        lab_size=size(labels);
+        vec_ind=[];
+        bboxes_=[];
+        labels_={};
+        color_={};
         for ind=1:lab_size(1)
-        k = findstr(labels{ind}, 'predicted')
-        if ~isempty(k)
-            vec_ind=[vec_ind ind];
-        end
+            k = findstr(labels{ind}, 'predicted')
+            if ~isempty(k)
+                vec_ind=[vec_ind ind];
+            end
         end
         new_ind=1;
         for i=1:bb_s(1)
@@ -86,17 +86,34 @@ color_={};
                 new_ind=new_ind+1;
             end
         end
-       % if ~isempty(labels) && numel(labels)>1
-         %labels(cellfun('isempty',labels)) = [];
-       % color(cellfun('isempty',color)) = [];
+        % if ~isempty(labels) && numel(labels)>1
+        %labels(cellfun('isempty',labels)) = [];
+        % color(cellfun('isempty',color)) = [];
         %end
         % Draw the objects on the frame.
-           if ~isempty(bboxes_) && ~isempty(labels_)
-        frame = insertObjectAnnotation(frame, 'rectangle', ...
-            bboxes_, labels_,'Color',color_);
-         % Draw the objects on the mask.
-        mask = insertObjectAnnotation(mask, 'rectangle', ...
-            bboxes_, labels_,'Color',color_);
+        if ~isempty(bboxes_) && ~isempty(labels_)
+            frame = insertObjectAnnotation(frame, 'rectangle', ...
+                bboxes_, labels_,'Color',color_);
+            % Draw the objects on the mask.
+            mask = insertObjectAnnotation(mask, 'rectangle', ...
+                bboxes_, labels_,'Color',color_);
+            
+            if numel(labels)>=4
+                color_density='red';
+                text_density='High density';
+            elseif numel(labels)>2 && numel(labels)<4
+                color_density='yellow';
+                text_density='Moderate density';
+            elseif numel(labels)<=2
+                color_density='green';
+                text_density='Low density';
+            end
+            
+            mask = insertText(mask,[0 0],text_density,'FontSize',18,'BoxColor',...
+                color_density,'BoxOpacity',0.4,'TextColor','white');
+            frame = insertText(frame,[0 0],text_density,'FontSize',18,'BoxColor',...
+                color_density,'BoxOpacity',0.4,'TextColor','white');
+            
         end
     end
 end
