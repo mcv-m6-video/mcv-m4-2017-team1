@@ -78,7 +78,7 @@ for seq=1
     for r=1:100
         velocity{r}=0;
     end
-    
+
     %Detect foreground objects in the second half of the sequence
     for i = iniFrame(seq)+25:endFrame(seq)
         %Read an image and convert it to grayscale
@@ -123,7 +123,24 @@ for seq=1
         tracks=deleteLostTracks(tracks);
         [nextId,tracks]=createNewTracks(tracks,unassignedDetections,centroids,bboxes,nextId);
      
-
+        
+        image_(49:51,:,1)=255;
+        image_(49:51,:,2)=0;
+        image_(49:51,:,3)=0;
+        
+        image_(424:426,:,1)=255;
+        image_(424:426,:,2)=0;
+        image_(424:426,:,3)=0;
+        
+        if ~isempty(tracks)
+            for i = 1:size(tracks,2)
+                if tracks(i).bbox(2) < 50 || tracks(i).bbox(2) > 425
+                    tracks = tracks(~i);
+                end
+            end
+        end
+            
+        
         for o=1:length(tracks)
             if identification(tracks(o).id)==0
                 %centroidsVel{tracks(o).id}(k,:)=[tracks(o).bbox(1)+(tracks(o).bbox(3)/2),tracks(o).bbox(2)+(tracks(o).bbox(4)/2)];
@@ -157,9 +174,10 @@ for seq=1
                 
             end
         end
-        
-          [speed_limit_pictures,speed_limit_id,speed_limit_labels]= displayTrackingResults(image_,detection_,tracks,velocity,speed_limit_pictures,speed_limit_id,speed_limit_labels);
-        if video==1
+
+         [speed_limit_pictures,speed_limit_id,speed_limit_labels]= displayTrackingResults(image_,detection_,tracks,velocity,speed_limit_pictures,speed_limit_id,speed_limit_labels);
+
+         if video==1
             F(ind) = getframe(gcf);
             writeVideo(v,F(ind));
             ind=ind+1;

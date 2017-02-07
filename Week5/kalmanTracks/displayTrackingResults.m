@@ -1,5 +1,6 @@
 function [speed_limit_pictures,speed_limit_id,speed_limit_labels]=displayTrackingResults(frame,mask,tracks,velocity,speed_limit_pictures,speed_limit_id,speed_limit_labels)
 % Convert the frame and the mask to uint8 RGB.
+
 frame = im2uint8(frame);
 mask = uint8(repmat(mask, [1, 1, 3])) .* 255;
 
@@ -45,11 +46,11 @@ if ~isempty(tracks)
             labels = strcat(labels, labelsextra ,vel, isPredicted);
             v=velocity1(ids);
             for k=1:length(v)
-
+                
                 if v(k)>80
                     if isempty(color)
                         color{1}='red';
-                     else
+                    else
                         color{end+1}='red';
                     end
                 else
@@ -122,29 +123,61 @@ if ~isempty(tracks)
                         i
                         labels_
                         bboxes_
-                 %   aux=bboxes_(i,:);
-                    %speed_limit_pictures={speed_limit_pictures; frame(aux(1):aux(1)+aux(3),aux(2):aux(2)+aux(4))};
-                   % speed_limit_pictures(end+1)={frame(aux(2):aux(2)+aux(4),aux(1):aux(1)+aux(3))};
-               %     speed_limit_labels=[speed_limit_labels; labels_{i}];
-                %    speed_limit_id=[speed_limit_id; str2num(labels_{i}(1))];
+                        %   aux=bboxes_(i,:);
+                        %speed_limit_pictures={speed_limit_pictures; frame(aux(1):aux(1)+aux(3),aux(2):aux(2)+aux(4))};
+                        % speed_limit_pictures(end+1)={frame(aux(2):aux(2)+aux(4),aux(1):aux(1)+aux(3))};
+                        %     speed_limit_labels=[speed_limit_labels; labels_{i}];
+                        %    speed_limit_id=[speed_limit_id; str2num(labels_{i}(1))];
+                    end
                 end
-            end
-            
+                
             end
         else
-               mask = insertText(mask,[0 0],'Low density','FontSize',18,'BoxColor',...
+            mask = insertText(mask,[0 0],'Low density','FontSize',18,'BoxColor',...
                 'green','BoxOpacity',0.4,'TextColor','white');
-             frame = insertText(frame,[0 0],'Low density','FontSize',18,'BoxColor',...
+            frame = insertText(frame,[0 0],'Low density','FontSize',18,'BoxColor',...
                 'green','BoxOpacity',0.4,'TextColor','white');
-         
+            
         end
+        
+    end
+    
+    
+end
 
+rightlane=0;
+leftlane=0;
+middlelane=0;
+if ~isempty(tracks)
+    for i = 1:size(tracks,2)
+        if tracks(i).bbox(1) < 108
+            leftlane = leftlane+1;
+        elseif tracks(i).bbox(1) > 196
+            rightlane = rightlane+1;
+        else
+            middlelane = middlelane+1;
+        end
+    end
 end
 
 % Display the mask and the frame.
-subplot(1,2,1)
+subplot(1,3,1)
 imshow(frame)
-subplot(1,2,2)
+subplot(1,3,2);
+axis off
+lane1 = sprintf('Vehicles in left lane: %d\n',leftlane);
+lane2 = sprintf('Vehicles in central lane: %d\n',middlelane);
+lane3 = sprintf('Vehicles in right lane: %d\n',rightlane);
+delete(findall(gcf,'Tag','vehiclecounter'))
+an = annotation('textbox','Position',[0.45,0.25,0.15,0.3],'String',{lane1, lane2, lane3});
+an.FontSize = 14;
+an.HorizontalAlignment = 'center';
+an.VerticalAlignment = 'middle';
+an.Tag ='vehiclecounter';
+subplot(1,3,3)
 imshow(mask)
 drawnow()
+
+
+
 end
