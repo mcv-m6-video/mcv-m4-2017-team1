@@ -43,13 +43,27 @@ if ~isempty(tracks)
             labels = strcat(labels, labelsextra ,vel, isPredicted);
         end
         
+        a=0;
+        for k=1:size(bboxes,1)
+            if bboxes(k,1)<0
+                a(k)=1;
+            end
+        end
+        a=a';
+        if a ~= 0
+            bboxes(a,:)=[];
+            labels(a,:)=[];
+        end
+        
+        number=cellstr(int2str(length(labels)));
+        numcars=strcat('num cars = ', number);
+                
         % Draw the objects on the frame.
-        frame = insertObjectAnnotation(frame, 'rectangle', ...
-            bboxes, labels);
+        frame = insertObjectAnnotation(frame, 'rectangle', bboxes, labels);
+        frame = insertText(frame,[0 0], numcars);
         
         % Draw the objects on the mask.
-        mask = insertObjectAnnotation(mask, 'rectangle', ...
-            bboxes, labels);
+        %mask = insertObjectAnnotation(mask, 'rectangle', bboxes, labels);
     end
 end
 
