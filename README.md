@@ -28,13 +28,16 @@ Also, you can visit and take a look at our weekly tasks in order to keep a track
 ### Results
 Here you can see some Results that we obtained with our work in the sequences *Highway* and *Traffic* from the web  [Change Detection](http://changedetection.net/):
 
-#####Traffic Sequence With Stabilization
+####Traffic Sequence With Stabilization
+
 [![Traffic Sequence With Stabilization](https://img.youtube.com/vi/nOrMGaLRq9Q&feature=youtu.be/0.jpg)](https://www.youtube.com/watch?v=nOrMGaLRq9Q&feature=youtu.be)
 
-#####Velocity And Tracking in Highway Sequence
+####Velocity And Tracking in Highway Sequence
+
 [![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/MeKDfXAyC2o&feature=youtu.be/0.jpg)](https://www.youtube.com/watch?v=MeKDfXAyC2o&feature=youtu.be)
 
-#####Velocity and Tracking in Traffic Sequence
+####Velocity and Tracking in Traffic Sequence
+
 [![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/8qlEJWr9Dig&feature=youtu.be/0.jpg)](https://www.youtube.com/watch?v=8qlEJWr9Dig&feature=youtu.be)
 
 
