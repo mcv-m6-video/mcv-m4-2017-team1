@@ -7,6 +7,21 @@ In this page you will find the documents of our project, based in tracking and s
 Some techniques that we have used in this project have been: background substraction, foreground segmentation, object tracking and video stabilization.
 
 
+
+
+--> to put images (see in edit mode) 
+
+![alt tag](https://github.com/mcv-m4-video/mcv-m4-2017-team1/blob/master/test.png)  ![alt tag](https://github.com/mcv-m4-video/mcv-m4-2017-team1/blob/master/test.png)
+
+We have developed a system that......
+mini description (and images of steps?)?  first foreground detection, then tracking with kalman, speed estimation (and alerts/photos over speed limit), we are able to generate a report with the following information:
+- density of the road
+- % of occupation of the road
+- number of cars in each lane
+- total number of cars in a sequence
+- ...
+
+
 ### Material
 You can find the paper summarizing our work Here.
 
