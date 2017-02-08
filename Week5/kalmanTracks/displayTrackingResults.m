@@ -4,6 +4,10 @@ function [speed_limit_pictures,speed_limit_id,speed_limit_labels,speed_limit_num
 frame = im2uint8(frame);
 mask = uint8(repmat(mask, [1, 1, 3])) .* 255;
 
+rightlane=0;
+leftlane=0;
+middlelane=0;
+
 minVisibleCount = 4;
 if ~isempty(tracks)
     
@@ -32,18 +36,15 @@ if ~isempty(tracks)
             [reliableTracks(:).consecutiveInvisibleCount] > 0;
         isPredicted = cell(size(labels));
         isPredicted(predictedTrackInds) = {' predicted'};
-        labelsextra=cell(size(labels));
         color={};
-        for k=1:length(ids)
-            labelsextra(k)= { ' speed= '};
-        end
+        
         
         if isempty(velocity)
             labels = strcat(labels, isPredicted);
             
         else
             vel=cellstr(int2str(velocity1(ids)'));
-            labels = strcat(labels, labelsextra ,vel, ' km/h ', isPredicted);
+            labels = strcat(labels, ' speed= ' ,vel, ' km/h ', isPredicted);
             v=velocity1(ids);
             for k=1:length(v)
                 
@@ -82,8 +83,23 @@ if ~isempty(tracks)
         for i=1:bb_s(1)
             if (sum(i==vec_ind)==0)
                 bboxes_(new_ind,:)=bboxes(i,:);
-                labels_{new_ind}=labels{i};
-                color_{new_ind}=color{i};
+                
+                %See if bbox is below or over the red lines
+                if bboxes(i,2) < 50 || bboxes(i,2) > 425
+                    labels_{new_ind} = '';
+                    color_{new_ind}='white';
+                else
+                    labels_{new_ind}=labels{i};
+                    color_{new_ind}=color{i};
+                end
+                
+                if bboxes(i,1) < 108
+                    leftlane = leftlane+1;
+                elseif bboxes(i,1) > 196
+                    rightlane = leftlane+1;
+                else
+                    middlelane = leftlane+1;
+                end
                 new_ind=new_ind+1;
             end
         end
@@ -170,20 +186,6 @@ if ~isempty(tracks)
     
 end
 
-rightlane=0;
-leftlane=0;
-middlelane=0;
-if ~isempty(tracks)
-    for i = 1:size(tracks,2)
-        if tracks(i).bbox(1) < 108
-            leftlane = leftlane+1;
-        elseif tracks(i).bbox(1) > 196
-            rightlane = rightlane+1;
-        else
-            middlelane = middlelane+1;
-        end
-    end
-end
 
 % Display the mask and the frame.
 subplot(1,3,1)
