@@ -39,14 +39,13 @@
 									</li>
 								</ul>
 							</li>
-							<li><a href="#" class="button">Sign Up</a></li>
 						</ul>
 					</nav>
 				</header>
 
 			<!-- Banner -->
 				<section id="banner">
-					<h2>SafeDrive</h2>
+					<h2>M4 Team 1. SafeDrive</h2>
 					<p>Road traffic surveillance and monitoring system</p>
 					<ul class="actions">
 						<li><a href="#" class="button special">Presentation slides</a></li>
@@ -77,24 +76,37 @@ mini description (and images of steps?)?  first foreground detection, then track
 							<section>
 								<span class="icon major fa-check-square accent2"></span>
 								<h3>Vehicle detection</h3>
-								<p>Integer volutpat ante et accumsan commophasellus sed aliquam feugiat lorem aliquet ut enim rutrum phasellus iaculis accumsan dolore magna aliquam veroeros.</p>
+								<p>
+								<ul><li>Performing a background/foreground segmentation of every frame in the video we are able to separate moving cars from static road background.</li>
+								<li>Background is modeled with a single adaptive Gaussian model per pixel.</li>
+								<li>This block outputs a binary segmented image, refined with morphological operators to eliminate noise and fix disconnected regions.</li>
+								</ul></p>
 							</section>
 							<section>
 								<span class="icon major fa-car accent3"></span>
 								<h3>Vehicle tracking</h3>
-								<p>Integer volutpat ante et accumsan commophasellus sed aliquam feugiat lorem aliquet ut enim rutrum phasellus iaculis accumsan dolore magna aliquam veroeros.</p>
+								<p><ul><li>To obtain a correct road geometry homography is applied to the segmented and original images. </li>
+								<li>After detecting blobs in the refined binary segmented image, Kalman filters are applied to track the cars.</li>
+								<li>A cost function is defined to decide whether a detection is part of a previous tracked car or not.</li></ul></p>
 							</section>
 						</div>
 						<div class="features-row">
 							<section>
 								<span class="icon major fa-forward accent4"></span>
 								<h3>Speed control</h3>
-								<p>Integer volutpat ante et accumsan commophasellus sed aliquam feugiat lorem aliquet ut enim rutrum phasellus iaculis accumsan dolore magna aliquam veroeros.</p>
+								<p><ul><li>Defining a relation between pixels/meters and frames/seconds, speed can be estimated following the tracked car coordinates.</li>
+								<li>An ID and the speed of each car is presented in the final system, together with a bounding box following the car</li></ul></p>
 							</section>
 							<section>
 								<span class="icon major fa-area-chart accent3"></span>
 								<h3>Statistical report</h3>
-								<p>Integer volutpat ante et accumsan commophasellus sed aliquam feugiat lorem aliquet ut enim rutrum phasellus iaculis accumsan dolore magna aliquam veroeros.</p>
+								<p>The final statistics we can obtain are:
+								<ul>
+								<li> density of the road at each frame</li>
+								<li> number of cars in each line at each frame</li>
+								<li> total number of cars in a sequence </li>
+								<li> total number and the images of cars which have exceeded the speed limit </li>
+								</ul>
 							</section>
 						</div>
 					</section>
