@@ -1,0 +1,14 @@
+function y = RemovePerspective(img, xx, yy)
+% s: it is a row vector indicating the size of the output image
+
+y = uint8(zeros(size(xx,1), size(xx,2), 3));
+
+
+for r = 1:size(xx,1)
+    for c = 1:size(xx,2)
+        
+        if cc>0 && cc<=size(img, 2) && xx(rr, cc)>0 && xx(rr, cc)<=size(img, 1)
+            y(r, c, :) = img(xx(rr, cc), yy(rr,cc), :);
+        end
+    end
+end
