@@ -4,35 +4,40 @@
 @import 'libs/skel';
 
 /*
-	Spectral by HTML5 UP
+	Alpha by HTML5 UP
 	html5up.net | @ajlkn
 	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
 */
 
-/* Icon */
+/* Basic */
 
-	.icon {
-		&.major {
-			border: none;
-
-			&:before {
-				font-size: 3em;
-			}
-		}
+	pre, code {
+		position: relative;
+		-ms-behavior: url('assets/js/ie/PIE.htc');
 	}
 
 /* Form */
-
-	label {
-		color: _palette(accent7, fg-bold);
-	}
 
 	input[type="text"],
 	input[type="password"],
 	input[type="email"],
 	select,
 	textarea {
-		border: solid 1px _palette(accent7, border);
+		position: relative;
+		-ms-behavior: url('assets/js/ie/PIE.htc');
+		line-height: 3em;
+	}
+
+	input[type="checkbox"],
+	input[type="radio"], {
+		opacity: 1;
+		z-index: auto;
+
+		& + label {
+			&:before {
+				display: none;
+			}
+		}
 	}
 
 /* Button */
@@ -40,24 +45,47 @@
 	input[type="submit"],
 	input[type="reset"],
 	input[type="button"],
-	button,
 	.button {
-		border: solid 2px _palette(accent7, border);
+		position: relative;
+		-ms-behavior: url('assets/js/ie/PIE.htc');
 
-		&.special {
-			border: 0 !important;
+		&.alt {
+			border: solid 2px _palette(border);
 		}
 	}
 
-/* Page Wrapper + Menu */
+/* Box */
 
-	#menu {
-		display: none;
+	.box {
+		position: relative;
+		-ms-behavior: url('assets/js/ie/PIE.htc');
+
+		.image {
+			&.featured {
+				margin: 2em 0;
+				width: 100%;
+			}
+		}
 	}
 
-	body.is-menu-visible {
-		#menu {
-			display: block;
+/* Icon */
+
+	.icon {
+		&.major {
+			position: relative;
+			-ms-behavior: url('assets/js/ie/PIE.htc');
+		}
+	}
+
+/* Image */
+
+	.image {
+		position: relative;
+		-ms-behavior: url('assets/js/ie/PIE.htc');
+
+		img {
+			position: relative;
+			-ms-behavior: url('assets/js/ie/PIE.htc');
 		}
 	}
 
@@ -67,10 +95,40 @@
 		nav {
 			> ul {
 				> li {
-					> a {
-						&.menuToggle {
-							&:after {
-								display: none;
+					a {
+						color: #fff;
+						display: inline-block;
+						text-decoration: none;
+						border: 0;
+
+						&.icon {
+							&:before {
+								color: #fff;
+								margin-right: 0.5em;
+							}
+						}
+					}
+				}
+			}
+		}
+
+		&.alt {
+			color: #fff;
+
+			nav {
+				> ul {
+					> li {
+						a:not(.button) {
+							&.icon {
+								&:before {
+									color: rgba(255,255,255,0.75);
+								}
+							}
+						}
+
+						&.active {
+							a:not(.button) {
+								background-color: rgba(255,255,255,0.2);
 							}
 						}
 					}
@@ -79,37 +137,56 @@
 		}
 	}
 
-/* Banner + Wrapper (style4) */
+	.dropotron {
+		border: solid 1px _palette(border);
 
-	#banner,
-	.wrapper.style4 {
-		-ms-behavior: url('assets/js/ie/backgroundsize.min.htc');
+		&.level-0 {
+			margin-top: 0;
 
-		&:before {
-			display: none;
+			&:before {
+				display: none;
+			}
 		}
 	}
 
 /* Banner */
 
 	#banner {
-		.more {
-			height: 4em;
+		background-attachment:	scroll;
+		background-image:		url('../../images/banner.jpg');
+		background-position:	auto;
+		background-repeat:		no-repeat;
+		background-size:		cover;
+		-ms-behavior: url('assets/js/ie/backgroundsize.min.htc');
 
-			&:after {
-				display: none;
-			}
+		input[type="submit"],
+		input[type="reset"],
+		input[type="button"],
+		.button {
+			border: solid 2px #fff;
 		}
 	}
 
 /* Main */
 
 	#main {
-		> header {
-			-ms-behavior: url('assets/js/ie/backgroundsize.min.htc');
+		position: relative;
+		z-index: 1;
+	}
 
-			&:before {
-				display: none;
-			}
+/* CTA */
+
+	#cta {
+		input[type="text"],
+		input[type="password"],
+		input[type="email"],
+		select,
+		textarea {
+			background: _palette(accent2, bg);
+			border: solid 2px #fff;
+		}
+
+		.formerize-placeholder {
+			color: #fff !important;
 		}
 	}
