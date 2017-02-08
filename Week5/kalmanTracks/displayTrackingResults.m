@@ -1,4 +1,4 @@
-function [speed_limit_pictures,speed_limit_id,speed_limit_labels]=displayTrackingResults(frame,mask,tracks,velocity,speed_limit_pictures,speed_limit_id,speed_limit_labels)
+function [speed_limit_pictures,speed_limit_id,speed_limit_labels,speed_limit_num_frame]=displayTrackingResults(number_frame,T,noh_frame,frame,mask,tracks,velocity,speed_limit_pictures,speed_limit_id,speed_limit_labels,speed_limit_num_frame)
 % Convert the frame and the mask to uint8 RGB.
 
 frame = im2uint8(frame);
@@ -43,7 +43,7 @@ if ~isempty(tracks)
             
         else
             vel=cellstr(int2str(velocity1(ids)'));
-            labels = strcat(labels, labelsextra ,vel, isPredicted);
+            labels = strcat(labels, labelsextra ,vel, ' km/h ', isPredicted);
             v=velocity1(ids);
             for k=1:length(v)
                 
@@ -119,19 +119,44 @@ if ~isempty(tracks)
             
             for i=1:numel(labels_)
                 if strcmp(color_{i},'red')
-                    if sum(str2num(labels_{i}(1))==speed_limit_id)==0
-                        i
-                        labels_
-                        bboxes_
-                        %   aux=bboxes_(i,:);
-                        %speed_limit_pictures={speed_limit_pictures; frame(aux(1):aux(1)+aux(3),aux(2):aux(2)+aux(4))};
-                        % speed_limit_pictures(end+1)={frame(aux(2):aux(2)+aux(4),aux(1):aux(1)+aux(3))};
-                        %     speed_limit_labels=[speed_limit_labels; labels_{i}];
-                        %    speed_limit_id=[speed_limit_id; str2num(labels_{i}(1))];
+                    labels_
+                    trimmed_str=strtrim(labels_{i});
+                    if sum(str2num(trimmed_str(1))==speed_limit_id)==0
+                        aux=bboxes_(i,:);
+                        if (aux(2)+aux(4)<=400 && aux(1)+aux(3)<=270) %check if bb is inside the image
+                            %   speed_limit_pictures{end+1}={frame(aux(2):aux(2)+aux(4),aux(1):aux(1)+aux(3))};
+                            x1_=[aux(1) aux(2); aux(1) aux(2)+aux(4); aux(1)+aux(3) aux(2); aux(1)+aux(3) aux(2)+aux(4)];
+                            
+                            %  T=inv(H);
+                            for ind=1:4
+                                p = double([x1_(ind,1) x1_(ind,2) 1]');
+                                pimh = T*p;
+                                pim(1) = pimh(1) / pimh(3);
+                                pim(2) = pimh(2) / pimh(3);
+                                cim = pim(1);
+                                rim = pim(2);
+                                
+                                cc(ind,1) = round(cim);
+                                cc(ind,2) = round(rim);
+                            end
+                            point=min(cc,[],1);
+                            point_l=max(cc,[],1)-min(cc,[],1);
+                            new_bb=[point(1) point(2) point_l(1) point_l(2)];
+                            speed_limit_pictures{end+1}={new_bb};
+                            speed_limit_num_frame(end+1)=number_frame;
+                            labels_{i}
+                            speed_limit_labels{end+1}={labels_{i}};
+                            speed_limit_id(end+1)=[str2num(labels_{i}(1))];
+                        end
                     end
+                    %   aux=bboxes_(i,:);
+                    %speed_limit_pictures={speed_limit_pictures; frame(aux(1):aux(1)+aux(3),aux(2):aux(2)+aux(4))};
+                    % speed_limit_pictures(end+1)={frame(aux(2):aux(2)+aux(4),aux(1):aux(1)+aux(3))};
+                    %     speed_limit_labels=[speed_limit_labels; labels_{i}];
+                    %    speed_limit_id=[speed_limit_id; str2num(labels_{i}(1))];
                 end
-                
             end
+            
         else
             mask = insertText(mask,[0 0],'Low density','FontSize',18,'BoxColor',...
                 'green','BoxOpacity',0.4,'TextColor','white');

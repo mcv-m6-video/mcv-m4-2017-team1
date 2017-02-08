@@ -5,9 +5,11 @@ video=0;
 if video==1
     ind=1;
 %    F(NFrames) = struct('cdata',[],'colormap',[]);
-    v = VideoWriter('RoadTraffic_surv.avi');
+    v = VideoWriter('RoadTraffic_surv_test.avi');
     v.FrameRate = 10;
     open(v)
+    figure;
+    set(gcf, 'Position', get(0,'Screensize')); % Maximize figure.
 end
 %x1=[77 126; 174 127; 18 309; 480 270];
 
@@ -18,7 +20,7 @@ x2 = makehomogeneous(x2');
 % x2 = [0 0 1; 0 1, 1; 1, 1, 1; 1, 0, 1];
 
 H = homography2d(x1, x2);
-
+T=inv(H);
 tic
 %Paths to the input images and their groundtruth
 sequencePath = {'datasets/ronda/01_twolanes/'} ;
@@ -38,7 +40,8 @@ nextId = 1; % ID of the next track
 num_cars=0;
 speed_limit_pictures={};
 speed_limit_id=[];
-speed_limit_labels=[];
+speed_limit_labels={};
+speed_limit_num_frame=[];
 
 framesPassed = 0;
 for seq=1
@@ -165,7 +168,7 @@ for seq=1
                 velocity{tracks(o).id}= ((displacement*pixel_meter)/time)*to_km;
                 
                 %Consider a valid car when we have to calculate velocity
-                if  counter(tracks(o).id)==1
+                if  counter(tracks(o).id)==5
                     num_cars=num_cars+1;
                 end
                 
@@ -175,8 +178,8 @@ for seq=1
             end
         end
 
-         [speed_limit_pictures,speed_limit_id,speed_limit_labels]= displayTrackingResults(image_,detection_,tracks,velocity,speed_limit_pictures,speed_limit_id,speed_limit_labels);
-
+           [speed_limit_pictures,speed_limit_id,speed_limit_labels,speed_limit_num_frame]= displayTrackingResults(i,T,image,image_,detection_,tracks,velocity,speed_limit_pictures,speed_limit_id,speed_limit_labels,speed_limit_num_frame);
+   
          if video==1
             F(ind) = getframe(gcf);
             writeVideo(v,F(ind));
@@ -198,4 +201,15 @@ if video==1
 end
 
 disp(['Total number of cars in the road: ' int2str(num_cars)])
+
+figure;
+for i=1:numel(speed_limit_num_frame)
+image = imread(strcat(char(sequencePath(seq)),FilesInput(speed_limit_num_frame(i)).name));
+bb=speed_limit_pictures{i};
+bb=bb{1};
+lab=speed_limit_labels{i};
+subplot(1,numel(speed_limit_num_frame),i)
+imshow(image(4*bb(2):4*bb(2)+4*bb(4), 4*bb(1):4*bb(1)+4*bb(3),:));
+title(cellstr(lab))
+end
 toc
