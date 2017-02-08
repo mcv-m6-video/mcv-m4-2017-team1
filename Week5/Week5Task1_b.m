@@ -1,6 +1,6 @@
 close all
 clear all
-video=0;
+video=1;
 
 if video==1
     ind=1;
@@ -27,7 +27,7 @@ sequencePath = {'datasets/ronda/01_twolanes/'} ;
 
 %Initial and final frame of the sequence
 iniFrame = [330];
-endFrame = [500]; %530
+endFrame = [1330]; %530
 
 % Create System objects used for detecting moving objects
 blobAnalyzer = vision.BlobAnalysis('BoundingBoxOutputPort', true, ...
@@ -48,11 +48,11 @@ for seq=1
     disp(['Sequence ' num2str(seq)])
     %Train the background model with the first half of the sequence
     [means, deviations] = trainBackgroundModel_final(char(sequencePath(seq)), iniFrame(seq), 25);
-    figure(4)
-    subplot(1,2,1)
-    imshow(uint8(means))
-    subplot(1,2,2)
-    imshow(uint8(deviations))
+%     figure(4)
+%     subplot(1,2,1)
+%     imshow(uint8(means))
+%     subplot(1,2,2)
+%     imshow(uint8(deviations))
     
     %Define the range of alpha
     %Define the range of rho
