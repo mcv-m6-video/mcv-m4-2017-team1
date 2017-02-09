@@ -1,4 +1,6 @@
 function tracks = initializeTracks()
+%Function extracted from Matlab's source code
+
 % create an empty array of tracks
 tracks = struct(...
     'id', {}, ...

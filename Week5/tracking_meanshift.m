@@ -1,6 +1,6 @@
 function matlab_mean_shift_avi( seq_name )
-%UNTITLED3 Summary of this function goes here
-%   Detailed explanation goes here
+%% This code is a modification of the adaptation of Matlab's "multiObjectTracking" 
+%example to Mean Shift, made by Team 1 of Class 2016 (function matlab_mean_shift_avi.m)
 
     % Create system objects used for reading video, detecting moving objects,
     % and displaying the results.

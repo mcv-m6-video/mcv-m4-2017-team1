@@ -1,7 +1,7 @@
 function [nextId,tracks]=createNewTracks(tracks,unassignedDetections,centroids,bboxes,nextId)
 centroids = centroids(unassignedDetections, :);
 bboxes = bboxes(unassignedDetections, :);
-
+%Function extracted and modified from Matlab's source code
 for i = 1:size(centroids, 1)
     
     centroid = centroids(i,:);

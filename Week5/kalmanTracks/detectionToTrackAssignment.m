@@ -1,5 +1,5 @@
     function [assignments, unassignedTracks, unassignedDetections] = detectionToTrackAssignment(tracks,centroids,sequence)
-
+%Function extracted and modified from Matlab's source code
         nTracks = length(tracks);
         nDetections = size(centroids, 1);
 

@@ -1,4 +1,5 @@
  function tracks=predictNewLocationsOfTracks(tracks)
+ %Function extracted and modified from Matlab's source code
         for i = 1:length(tracks)
             bbox = tracks(i).bbox;
 

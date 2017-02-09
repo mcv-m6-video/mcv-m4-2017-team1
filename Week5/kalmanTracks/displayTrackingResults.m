@@ -1,6 +1,7 @@
 function [speed_limit_pictures,speed_limit_id,speed_limit_labels,speed_limit_num_frame]=displayTrackingResults(number_frame,T,noh_frame,frame,mask,tracks,velocity,speed_limit_pictures,speed_limit_id,speed_limit_labels,speed_limit_num_frame)
-% Convert the frame and the mask to uint8 RGB.
+%Function extracted and modified from Matlab's source code
 
+% Convert the frame and the mask to uint8 RGB.
 frame = im2uint8(frame);
 mask = uint8(repmat(mask, [1, 1, 3])) .* 255;
 
@@ -123,8 +124,8 @@ if ~isempty(tracks)
                 color_density='yellow';
                 text_density='Moderate density';
             elseif numel(labels_)<=2
-                color_density='green';
-                text_density='Low density';
+                color_density='red';
+                text_density='High density';
             end
             
             mask = insertText(mask,[0 0],text_density,'FontSize',18,'BoxColor',...

@@ -1,4 +1,5 @@
     function tracks=updateAssignedTracks(assignments,centroids,bboxes,tracks)
+    %Function extracted from Matlab's source code
         numAssignedTracks = size(assignments, 1);
         for i = 1:numAssignedTracks
             trackIdx = assignments(i, 1);

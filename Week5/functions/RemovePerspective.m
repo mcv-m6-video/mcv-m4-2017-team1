@@ -1,4 +1,5 @@
 function y = RemovePerspective(img, H, s)
+% Function used from Team2, class2016 , M4
 % s: it is a row vector indicating the size of the output image
 
 y = uint8(zeros(s(1), s(2), 3));

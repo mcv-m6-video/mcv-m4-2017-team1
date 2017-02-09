@@ -1,4 +1,6 @@
 function [frame, mask]= displayTrackingResultsHighway(frame,mask,tracks,velocity)
+%Function extracted and modified from Matlab's source code
+
 % Convert the frame and the mask to uint8 RGB.
 frame = im2uint8(frame);
 mask = uint8(repmat(mask, [1, 1, 3])) .* 255;

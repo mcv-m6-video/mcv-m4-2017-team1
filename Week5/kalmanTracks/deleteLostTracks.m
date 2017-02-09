@@ -1,4 +1,5 @@
 function tracks=deleteLostTracks(tracks)
+%Function extracted and modified from Matlab's source code
 if isempty(tracks)
     return;
 end

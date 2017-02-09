@@ -59,7 +59,11 @@ for seq=1
     %     meansrgI(:,:,1) = meansrgI(:,:,1)./(meansrgI(:,:,1)+meansrgI(:,:,2)+meansrgI(:,:,3));
     %     meansrgI(:,:,2) = meansrgI(:,:,2)./(meansrgI(:,:,1)+meansrgI(:,:,2)+meansrgI(:,:,3));
     %     meansrgI(:,:,3) = (meansrgI(:,:,1)+meansrgI(:,:,2)+meansrgI(:,:,3));
-    
+    figure;
+    subplot(1,2,1)
+    imshow(uint8(means))
+    subplot(1,2,2)
+    imshow(uint8(deviations))
     
     %Define alpha
     %Define rho
